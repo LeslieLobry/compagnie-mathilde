@@ -16,14 +16,33 @@ model SiteSettings {
 }
 
 model Spectacle {
-  id          Int      @id @default(autoincrement())
-  title       String
-  subtitle    String?   // ex: "Théâtre & cabaret — 1h15"
-  description String?
-  texte       String?
-  mes         String?
-  createdAt   DateTime @default(now())
+  id           Int              @id @default(autoincrement())
+  title        String
+  subtitle     String?
+  description  String?
+  texte        String?          // auteur·rice
+  mes          String?          // mise en scène
+  distribution String?
+  autresInfos  String?
+
+  dossierPath  String?          // URL du PDF (dossier presse / artistique)
+  photos       SpectaclePhoto[]
+
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
 }
+
+model SpectaclePhoto {
+  id          Int        @id @default(autoincrement())
+  spectacle   Spectacle  @relation(fields: [spectacleId], references: [id], onDelete: Cascade)
+  spectacleId Int
+
+  imagePath   String
+  legend      String?
+  order       Int        @default(0)
+  createdAt   DateTime   @default(now())
+}
+
 model AgendaItem {
   id          Int      @id @default(autoincrement())
   period      String   // ex : "Mars → Mai 2026"

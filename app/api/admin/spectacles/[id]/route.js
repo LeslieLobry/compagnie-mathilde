@@ -11,9 +11,10 @@ export async function PUT(req, { params }) {
   }
 
   const body = await req.json();
-  const { title, subtitle, texte, mes, description } = body;
+  const { title, subtitle, description, texte, mes, distribution, autresInfos } =
+    body;
 
-  if (!title || title.trim() === "") {
+  if (!title) {
     return NextResponse.json(
       { error: "Titre obligatoire" },
       { status: 400 }
@@ -23,11 +24,13 @@ export async function PUT(req, { params }) {
   const spectacle = await prisma.spectacle.update({
     where: { id },
     data: {
-      title: title.trim(),
-      subtitle: subtitle || "",
-      texte: texte || "",
-      mes: mes || "",
-      description: description || "",
+      title,
+      subtitle: subtitle || null,
+      description: description || null,
+      texte: texte || null,
+      mes: mes || null,
+      distribution: distribution || null,
+      autresInfos: autresInfos || null,
     },
   });
 

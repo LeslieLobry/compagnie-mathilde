@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 export default function AdminSpectaclesManager({ initialSpectacles }) {
   const [spectacles, setSpectacles] = useState(initialSpectacles || []);
@@ -9,9 +10,11 @@ export default function AdminSpectaclesManager({ initialSpectacles }) {
 
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
+  const [description, setDescription] = useState("");
   const [texte, setTexte] = useState("");
   const [mes, setMes] = useState("");
-  const [description, setDescription] = useState("");
+  const [distribution, setDistribution] = useState("");
+  const [autresInfos, setAutresInfos] = useState("");
 
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -20,18 +23,22 @@ export default function AdminSpectaclesManager({ initialSpectacles }) {
     setEditingId(null);
     setTitle("");
     setSubtitle("");
+    setDescription("");
     setTexte("");
     setMes("");
-    setDescription("");
+    setDistribution("");
+    setAutresInfos("");
   };
 
   const handleEdit = (s) => {
     setEditingId(s.id);
     setTitle(s.title || "");
     setSubtitle(s.subtitle || "");
+    setDescription(s.description || "");
     setTexte(s.texte || "");
     setMes(s.mes || "");
-    setDescription(s.description || "");
+    setDistribution(s.distribution || "");
+    setAutresInfos(s.autresInfos || "");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -58,20 +65,23 @@ export default function AdminSpectaclesManager({ initialSpectacles }) {
     const payload = {
       title,
       subtitle,
+      description,
       texte,
       mes,
-      description,
+      distribution,
+      autresInfos,
     };
 
     const url = editingId
       ? `/api/admin/spectacles/${editingId}`
       : "/api/admin/spectacles";
-
     const method = editingId ? "PUT" : "POST";
 
     const res = await fetch(url, {
       method,
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify(payload),
     });
 
@@ -82,17 +92,15 @@ export default function AdminSpectaclesManager({ initialSpectacles }) {
       return;
     }
 
-    const spectacle = await res.json();
+    const saved = await res.json();
 
     if (editingId) {
-      // mise à jour
       setSpectacles((prev) =>
-        prev.map((s) => (s.id === spectacle.id ? spectacle : s))
+        prev.map((s) => (s.id === saved.id ? saved : s))
       );
       setMessage("Spectacle mis à jour ✔");
     } else {
-      // création
-      setSpectacles((prev) => [...prev, spectacle]);
+      setSpectacles((prev) => [...prev, saved]);
       setMessage("Spectacle ajouté ✔");
     }
 
@@ -103,20 +111,20 @@ export default function AdminSpectaclesManager({ initialSpectacles }) {
     <div className="admin-grid">
       {/* FORMULAIRE */}
       <form onSubmit={handleSubmit} className="admin-form">
-        <h3>{editingId ? "Modifier un spectacle" : "Nouveau spectacle"}</h3>
+        <h3>{editingId ? "Modifier un spectacle" : "Ajouter un spectacle"}</h3>
 
         <label>
           Titre *
           <input
             type="text"
-            required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            required
           />
         </label>
 
         <label>
-          Sous-titre (ex : Théâtre &amp; cabaret — 1h15)
+          Sous-titre
           <input
             type="text"
             value={subtitle}
@@ -125,7 +133,16 @@ export default function AdminSpectaclesManager({ initialSpectacles }) {
         </label>
 
         <label>
-          Auteur / Texte
+          Description (résumé)
+          <textarea
+            rows={4}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+        </label>
+
+        <label>
+          Texte
           <input
             type="text"
             value={texte}
@@ -143,11 +160,20 @@ export default function AdminSpectaclesManager({ initialSpectacles }) {
         </label>
 
         <label>
-          Description
+          Distribution
           <textarea
-            rows={4}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            rows={3}
+            value={distribution}
+            onChange={(e) => setDistribution(e.target.value)}
+          />
+        </label>
+
+        <label>
+          Autres infos
+          <textarea
+            rows={3}
+            value={autresInfos}
+            onChange={(e) => setAutresInfos(e.target.value)}
           />
         </label>
 
@@ -165,7 +191,7 @@ export default function AdminSpectaclesManager({ initialSpectacles }) {
               className="btn ghost"
               onClick={resetForm}
             >
-              Annuler la modification
+              Annuler
             </button>
           )}
         </div>
@@ -173,11 +199,11 @@ export default function AdminSpectaclesManager({ initialSpectacles }) {
         {message && <p className="admin-message">{message}</p>}
       </form>
 
-      {/* LISTE DES SPECTACLES */}
+      {/* LISTE */}
       <div>
         <h3>Liste des spectacles</h3>
         {spectacles.length === 0 ? (
-          <p>Aucun spectacle enregistré pour l&apos;instant.</p>
+          <p>Aucun spectacle pour l&apos;instant.</p>
         ) : (
           <table className="admin-table">
             <thead>
@@ -195,12 +221,16 @@ export default function AdminSpectaclesManager({ initialSpectacles }) {
                   <td>{s.title}</td>
                   <td>{s.subtitle}</td>
                   <td className="admin-actions">
-                    <button
-                      type="button"
-                      onClick={() => handleEdit(s)}
-                    >
+                    <button type="button" onClick={() => handleEdit(s)}>
                       Modifier
                     </button>
+                    <Link
+                      href={`/admin/spectacles/${s.id}`}
+                      className="btn ghost"
+                      style={{ fontSize: 12 }}
+                    >
+                      Photos & dossier
+                    </Link>
                     <button
                       type="button"
                       onClick={() => handleDelete(s.id)}

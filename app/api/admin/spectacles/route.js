@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 
 export const runtime = "nodejs";
 
-// Liste complète (optionnel pour rafraîchir côté client)
+// GET : liste
 export async function GET() {
   const spectacles = await prisma.spectacle.findMany({
     orderBy: { id: "asc" },
@@ -12,12 +12,13 @@ export async function GET() {
   return NextResponse.json(spectacles);
 }
 
-// Création
+// POST : création
 export async function POST(req) {
   const body = await req.json();
-  const { title, subtitle, texte, mes, description } = body;
+  const { title, subtitle, description, texte, mes, distribution, autresInfos } =
+    body;
 
-  if (!title || title.trim() === "") {
+  if (!title) {
     return NextResponse.json(
       { error: "Titre obligatoire" },
       { status: 400 }
@@ -26,11 +27,13 @@ export async function POST(req) {
 
   const spectacle = await prisma.spectacle.create({
     data: {
-      title: title.trim(),
-      subtitle: subtitle || "",
-      texte: texte || "",
-      mes: mes || "",
-      description: description || "",
+      title,
+      subtitle: subtitle || null,
+      description: description || null,
+      texte: texte || null,
+      mes: mes || null,
+      distribution: distribution || null,
+      autresInfos: autresInfos || null,
     },
   });
 

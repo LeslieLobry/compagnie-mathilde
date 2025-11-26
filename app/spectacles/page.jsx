@@ -2,6 +2,10 @@
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 
+export const metadata = {
+  title: "Spectacles — Compagnie MATHILDE",
+};
+
 export default async function SpectaclesPage() {
   const spectacles = await prisma.spectacle.findMany({
     orderBy: { id: "asc" },
@@ -12,7 +16,9 @@ export default async function SpectaclesPage() {
       <section className="sub-hero">
         <div className="sub-hero-inner">
           <h2 className="sub-hero-title">Spectacles</h2>
-          <p className="sub-hero-lead">Sélection de créations.</p>
+          <p className="sub-hero-lead">
+            Découvrez les créations de la Compagnie MATHILDE.
+          </p>
         </div>
       </section>
 
@@ -23,19 +29,19 @@ export default async function SpectaclesPage() {
               <Link
                 key={s.id}
                 href={`/spectacles/${s.id}`}
-                className="card" // on garde le style .card
+                className="card"
               >
+                {/* Si un jour tu ajoutes une image d'affiche en BDD, tu pourras la mettre ici */}
                 <div className="card-top" />
                 <div className="card-bottom">
                   <h3>{s.title}</h3>
                   {s.subtitle && <div className="chip">{s.subtitle}</div>}
-                  {(s.texte || s.mes) && (
-                    <div className="meta">
-                      {s.texte && <span>Texte : {s.texte}</span>}
-                      {s.mes && <span>M.e.s : {s.mes}</span>}
-                    </div>
+                  {s.description && (
+                    <p style={{ margin: "0 14px 14px", fontSize: 14 }}>
+                      {s.description.slice(0, 180)}
+                      {s.description.length > 180 ? "…" : ""}
+                    </p>
                   )}
-                  {s.description && <p>{s.description}</p>}
                 </div>
               </Link>
             ))}

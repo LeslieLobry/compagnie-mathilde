@@ -9,7 +9,7 @@ export default async function HomePage() {
 
   return (
     <main className="page">
-      {/* HERO avec image venant des settings */}
+      {/* HERO */}
       <header className="hero">
         <img
           className="hero-bg"
@@ -33,6 +33,40 @@ export default async function HomePage() {
           </div>
         </div>
       </header>
+
+      {/* SECTION COMPAGNIE déplacée ici */}
+      <section className="section">
+        <div className="container about">
+          <div className="panel">
+            <p>
+           La compagnie MATHILDE est implantée à Saint-Pair-Sur-Mer dans la Manche. 
+Elle défend les textes de Manon Viel qui, mêlant humour et onirisme, interroge nos liens les plus intimes en donnant corps à des fictions sensibles et insolentes pour revisitent nos modèles relationnels et familiaux. 
+Elle porte une parole théâtrale libre, joyeuse et poétique, pour ouvrir de nouveaux imaginaires intimes et politiques. 
+
+            </p>
+          </div>
+
+          <div className="panel">
+            <h4 className="panel-title">informations</h4>
+            <dl>
+              <dt>Association</dt>
+              <dd>Compagnie MATHILDE</dd>
+              <dt>Adresse</dt>
+              <dd>
+                56 rue Jacques-Yves Cousteau
+                <br />
+                50380 Saint-Pair-sur-Mer
+              </dd>
+              <dt>Président</dt>
+              <dd>Bruno Benoiste-Pilloire</dd>
+              <dt>Trésorière</dt>
+              <dd>Solene Abboud</dd>
+              <dt>Contact</dt>
+              <dd>compagniemathilde@gmail.com</dd> 
+            </dl>
+          </div>
+        </div>
+      </section>
 
       {/* teaser Spectacles */}
       <section className="section">

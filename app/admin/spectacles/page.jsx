@@ -13,7 +13,8 @@ export default async function AdminSpectaclesPage() {
         <div className="container">
           <h2 className="section-title">Administration — Spectacles</h2>
           <p className="section-lead">
-            Ajouter, modifier ou supprimer les spectacles affichés sur le site.
+            Ajouter, modifier ou supprimer les spectacles, puis gérer
+            leurs photos et dossiers PDF.
           </p>
 
           <AdminSpectaclesManager initialSpectacles={spectacles} />

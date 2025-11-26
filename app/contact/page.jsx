@@ -42,6 +42,8 @@ export default function ContactPage() {
               <br />
               Trésorière : Solene Abboud
             </p>
+            <dt>Contact</dt>
+              <dd>compagniemathilde@gmail.com</dd> 
           </div>
         </div>
       </section>

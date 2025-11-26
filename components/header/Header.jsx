@@ -17,7 +17,7 @@ export default function Header() {
 
         <div className={`menu ${open ? "open" : ""}`} id="menu">
           <Link href="/spectacles">Spectacles</Link>
-          <Link href="/compagnie">Compagnie</Link>
+          {/* <Link href="/compagnie">Compagnie</Link> */}
           <Link href="/agenda">Agenda</Link>
           <Link href="/medias">Médias</Link>
           <Link href="/presse">Presse</Link>
