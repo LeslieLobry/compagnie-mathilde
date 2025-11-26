@@ -11,9 +11,11 @@
   "dependencies": {
     "next": "16.0.4",
     "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react-dom": "19.2.0",
+    "@prisma/client": "5.19.1"
   },
   "devDependencies": {
+    "prisma": "5.19.1",
     "eslint": "^9",
     "eslint-config-next": "16.0.4"
   }

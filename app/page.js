@@ -1,66 +1,60 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+// app/page.jsx
+import prisma from "@/lib/prisma";
 
-export default function Home() {
+export default async function HomePage() {
+  const settings = await prisma.siteSettings.findUnique({ where: { id: 1 } });
+  const spectacles = await prisma.spectacle.findMany({
+    orderBy: { id: "asc" },
+  });
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <main className="page">
+      {/* HERO avec image venant des settings */}
+      <header className="hero">
+        <img
+          className="hero-bg"
+          src={settings?.heroImage || "/accueil.jpeg"}
+          alt="Photo de spectacle Compagnie MATHILDE"
         />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.js file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
+        <div className="hero-wrap">
+          <div className="hero-text">
+            <div className="kicker">Théâtre & cabaret</div>
+            <h2 className="title">{settings?.heroTitle}</h2>
+            <p className="lead">{settings?.heroSubtitle}</p>
+            <p className="lead small">{settings?.heroText}</p>
+            <div className="cta">
+              <a className="btn primary" href="/spectacles">
+                Découvrir les spectacles
+              </a>
+              <a className="btn ghost" href="/contact">
+                Nous contacter
+              </a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* teaser Spectacles */}
+      <section className="section">
+        <div className="container">
+          <h3 className="section-title">Spectacles</h3>
+          <p className="section-lead">
+            Découvrez les créations de la Compagnie MATHILDE.
           </p>
+
+          <div className="grid">
+            {spectacles.map((s) => (
+              <article key={s.id} className="card">
+                <div className="card-top" />
+                <div className="card-bottom">
+                  <h3>{s.title}</h3>
+                  {s.subtitle && <div className="chip">{s.subtitle}</div>}
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      </section>
+    </main>
   );
 }

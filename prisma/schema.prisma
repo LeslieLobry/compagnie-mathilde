@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model SiteSettings {
+  id           Int     @id @default(1)
+  heroTitle    String
+  heroSubtitle String
+  heroText     String
+  heroImage    String   // chemin vers l'image de couverture (ex: /uploads/hero.jpg)
+}
+
+model Spectacle {
+  id          Int      @id @default(autoincrement())
+  title       String
+  subtitle    String?   // ex: "Théâtre & cabaret — 1h15"
+  description String?
+  texte       String?
+  mes         String?
+  createdAt   DateTime @default(now())
+}
+model AgendaItem {
+  id          Int      @id @default(autoincrement())
+  period      String   // ex : "Mars → Mai 2026"
+  title       String   // ex : "Création — Théâtre de l'Essaïon (Paris)"
+  location    String?  // ex : "Paris", "Normandie..."
+  description String?  // texte libre
+  order       Int      @default(0) // pour trier l'affichage
+  createdAt   DateTime @default(now())
+}
+model MediaItem {
+  id        Int      @id @default(autoincrement())
+  title     String?  // titre optionnel
+  legend    String?  // légende / crédit
+  imagePath String   // ex: /uploads/medias/photo-xxx.jpg
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+}
