@@ -2,7 +2,7 @@
 import "./globals.css";
 import Header from "../components/header/Header";
 import Footer from "../components/Footer/Footer";
-
+export const dynamic = "force-dynamic"; 
 export const metadata = {
   title: "Compagnie MATHILDE — Théâtre & cabaret",
   description:
