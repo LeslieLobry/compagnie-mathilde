@@ -32,6 +32,22 @@ a {
 .page {
   min-height: 100vh;
 }
+/* TITRES : Montserrat */
+h1,
+h2,
+h3,
+h4,
+.section-title,
+.sub-hero-title,
+.panel-title,
+.brand h1,
+.title,
+.spectacle-title,
+.home-spectacle-title,
+.press-title {
+  font-family: "Montserrat", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
 
 /* NAV */
 
@@ -237,7 +253,9 @@ a {
   gap: 14px;
   margin-top: 26px;
 }
-
+.panel-text p{
+  font-size: 20px;
+}
 /* (optionnel) pour ajuster le comportement des CTA du hero */
 .hero-actions {
   /* tu peux ajouter des styles spécifiques ici si besoin */
