@@ -35,6 +35,11 @@ export default async function AdminHomePage() {
               <p>Ajouter des photos, légendes, crédits.</p>
             </Link>
 
+            <Link href="/admin/presse" className="admin-card">
+              <h3>Presse</h3>
+              <p>Gérer les articles, citations et visuels presse.</p>
+            </Link>
+
             {/* 🆕 Carte Galerie */}
             <Link href="/admin/galerie" className="admin-card">
               <h3>Galerie</h3>

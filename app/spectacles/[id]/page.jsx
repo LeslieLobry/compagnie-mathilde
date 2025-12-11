@@ -1,91 +1,146 @@
 // app/spectacles/[id]/page.jsx
+import './spectacles.css'
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 
+/**
+ * Metadata dynamique pour chaque spectacle
+ */
 export async function generateMetadata({ params }) {
-  const id = Number(params.id);
-  if (Number.isNaN(id)) return {};
-  const spectacle = await prisma.spectacle.findUnique({ where: { id } });
+  const { id } = await params; // Next 15 : params est une Promise
+  const numId = Number(id);
+
+  if (Number.isNaN(numId)) return {};
+
+  const spectacle = await prisma.spectacle.findUnique({
+    where: { id: numId },
+  });
+
   if (!spectacle) return {};
+
   return {
     title: `${spectacle.title} — Compagnie MATHILDE`,
   };
 }
 
+/**
+ * Page spectacle
+ */
 export default async function SpectaclePage({ params }) {
-  const id = Number(params.id);
-  if (Number.isNaN(id)) notFound();
+  const { id } = await params; // Next 15 : params est une Promise
+  const numId = Number(id);
+
+  if (Number.isNaN(numId)) {
+    notFound();
+  }
 
   const spectacle = await prisma.spectacle.findUnique({
-    where: { id },
+    where: { id: numId },
     include: {
       photos: { orderBy: { order: "asc" } },
     },
   });
 
-  if (!spectacle) notFound();
+  if (!spectacle) {
+    notFound();
+  }
+
+  const heroPhoto =
+    spectacle.photos && spectacle.photos.length > 0
+      ? spectacle.photos[0]
+      : null;
 
   return (
-    <main className="page">
-      {/* HEADER */}
-      <section className="sub-hero">
-        <div className="sub-hero-inner">
-          <h2 className="sub-hero-title">{spectacle.title}</h2>
-          {spectacle.subtitle && (
-            <p className="sub-hero-lead">{spectacle.subtitle}</p>
+    <main className="page spectacle-page">
+      {/* HERO en 2 colonnes : texte + image */}
+      <section className="spectacle-hero">
+        <div className="container spectacle-hero-inner">
+          <div className="spectacle-hero-text">
+            <span className="spectacle-kicker">Spectacle</span>
+            <h1 className="spectacle-title">{spectacle.title}</h1>
+
+            {spectacle.subtitle && (
+              <p className="spectacle-subtitle">{spectacle.subtitle}</p>
+            )}
+
+            <div className="spectacle-hero-meta">
+              {spectacle.texte && (
+                <span className="spectacle-pill">
+                  Texte&nbsp;: <strong>{spectacle.texte}</strong>
+                </span>
+              )}
+
+              {spectacle.mes && (
+                <span className="spectacle-pill">
+                  Mise en scène&nbsp;: <strong>{spectacle.mes}</strong>
+                </span>
+              )}
+            </div>
+          </div>
+
+          {heroPhoto && (
+            <div className="spectacle-hero-image">
+              <img
+                src={heroPhoto.imagePath}
+                alt={heroPhoto.legend || spectacle.title}
+              />
+            </div>
           )}
         </div>
       </section>
 
-      {/* DESCRIPTION + CREDITS */}
-      <section className="section">
-        <div className="container about">
-          <div className="panel">
-            <h4 className="panel-title">La pièce</h4>
+      {/* DESCRIPTION + CRÉDITS */}
+      <section className="section spectacle-content">
+        <div className="container spectacle-layout">
+          {/* La pièce */}
+          <div className="panel spectacle-story">
+            <h2 className="panel-title">La pièce</h2>
             {spectacle.description ? (
-              <p>{spectacle.description}</p>
+              <p className="spectacle-text">{spectacle.description}</p>
             ) : (
-              <p>
+              <p className="spectacle-text">
                 La description détaillée de ce spectacle sera ajoutée
                 prochainement.
               </p>
             )}
           </div>
 
-          <div className="panel">
-            <h4 className="panel-title">Crédits artistiques</h4>
-            <dl>
+          {/* Crédits */}
+          <aside className="panel spectacle-credits">
+            <h2 className="panel-title">Crédits artistiques</h2>
+
+            <dl className="credits-list">
               {spectacle.texte && (
-                <>
+                <div className="credits-row">
                   <dt>Texte</dt>
                   <dd>{spectacle.texte}</dd>
-                </>
+                </div>
               )}
 
               {spectacle.mes && (
-                <>
+                <div className="credits-row">
                   <dt>Mise en scène</dt>
                   <dd>{spectacle.mes}</dd>
-                </>
+                </div>
               )}
 
               {spectacle.distribution && (
-                <>
+                <div className="credits-row">
                   <dt>Distribution</dt>
                   <dd>{spectacle.distribution}</dd>
-                </>
+                </div>
               )}
 
               {spectacle.autresInfos && (
-                <>
+                <div className="credits-row">
                   <dt>Infos complémentaires</dt>
                   <dd>{spectacle.autresInfos}</dd>
-                </>
+                </div>
               )}
             </dl>
 
             {spectacle.dossierPath && (
-              <p style={{ marginTop: 18 }}>
+              <p className="spectacle-dossier">
                 <a
                   href={spectacle.dossierPath}
                   target="_blank"
@@ -97,42 +152,40 @@ export default async function SpectaclePage({ params }) {
               </p>
             )}
 
-            <p style={{ marginTop: 16, fontSize: 14 }}>
+            <p className="spectacle-contact">
               Pour un dossier complet, une fiche technique ou une demande de
               diffusion :{" "}
-              <a href="/contact" style={{ textDecoration: "underline" }}>
+              <a href="/contact" className="spectacle-contact-link">
                 contacter la Compagnie
               </a>
               .
             </p>
-          </div>
+          </aside>
         </div>
       </section>
 
       {/* GALERIE PHOTO */}
       {spectacle.photos && spectacle.photos.length > 0 && (
-        <section className="section">
+        <section className="section spectacle-gallery">
           <div className="container">
-            <h3 className="section-title">Galerie photo</h3>
-            <p className="section-lead">
-              Quelques images issues du spectacle.
-            </p>
+            <div className="spectacle-gallery-header">
+              <h2 className="section-title">Galerie photo</h2>
+              <p className="section-lead">
+                Quelques images issues du spectacle.
+              </p>
+            </div>
 
-            <div className="gallery">
+            <div className="spectacle-gallery-grid">
               {spectacle.photos.map((p) => (
-                <figure key={p.id}>
-                  <img
-                    src={p.imagePath}
-                    alt={p.legend || spectacle.title}
-                  />
+                <figure key={p.id} className="spectacle-gallery-item">
+                  <div className="spectacle-gallery-image-wrapper">
+                    <img
+                      src={p.imagePath}
+                      alt={p.legend || spectacle.title}
+                    />
+                  </div>
                   {p.legend && (
-                    <figcaption
-                      style={{
-                        marginTop: 6,
-                        fontSize: 12,
-                        color: "#a5b1c2",
-                      }}
-                    >
+                    <figcaption className="spectacle-caption">
                       {p.legend}
                     </figcaption>
                   )}

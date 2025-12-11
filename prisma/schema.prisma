@@ -18,6 +18,9 @@ model SiteSettings {
 
   // Clé S3 pour pouvoir supprimer/remplacer proprement (ex: hero/hero-123.jpg)
   heroImageKey String?
+
+  // ✅ Texte de présentation de la compagnie (panel-text sur la home)
+  aboutText    String?
 }
 
 model Spectacle {
@@ -55,12 +58,16 @@ model SpectaclePhoto {
 
 model AgendaItem {
   id          Int      @id @default(autoincrement())
-  period      String   // ex : "Mars → Mai 2026"
-  title       String   // ex : "Création — Théâtre de l'Essaïon (Paris)"
-  location    String?  // ex : "Paris", "Normandie..."
-  description String?  // texte libre
-  order       Int      @default(0) // pour trier l'affichage
+  period      String
+  title       String
+  location    String?
+  description String?
+  order       Int      @default(0)
+  link        String?   // lien billetterie
+  imageUrl    String?   // URL S3 de l'affiche
+
   createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model MediaItem {
@@ -69,7 +76,7 @@ model MediaItem {
   legend    String?  // légende / crédit
 
   // URL S3 complète (ex: https://.../medias/photo-xxx.jpg)
-  imagePath String
+  imagePath  String
 
   // Clé S3 interne (ex: medias/photo-xxx.jpg)
   storageKey String?
@@ -90,4 +97,15 @@ model GalleryImage {
   storageKey String?
 
   createdAt  DateTime @default(now())
+}
+model PressItem {
+  id        Int      @id @default(autoincrement())
+  title     String           // Titre de l’article
+  mediaName String           // Nom du média (Libération, France 3…)
+  url       String?          // Lien vers l’article en ligne
+  quote     String?          // Petite citation / phrase mise en avant
+  imageUrl  String?          // URL de la photo/scan de l’article
+  date      DateTime?        // Date de parution
+  order     Int      @default(0) // Pour trier si besoin
+  createdAt DateTime @default(now())
 }

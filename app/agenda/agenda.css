@@ -1,0 +1,133 @@
+/* Grille des cartes */
+.agenda-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2.4rem;
+  margin-top: 2.5rem;
+}
+
+/* Carte */
+.agenda-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: radial-gradient(circle at top left, rgba(255,255,255,0.04), rgba(0,0,0,0.5));
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+  transform: translateY(0) scale(1);
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease,
+    background 0.25s ease;
+}
+
+.agenda-card:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+/* Image */
+.agenda-card-image-wrapper {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.agenda-card-image {
+  display: block;
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+  transform: scale(1.05);
+  transition:
+    transform 0.35s ease,
+    filter 0.35s ease;
+}
+
+.agenda-card:hover .agenda-card-image {
+  transform: scale(1.12);
+  filter: brightness(1.08);
+}
+
+/* Voile sombre léger sur l'image */
+.agenda-card-image-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.25),
+    rgba(0, 0, 0, 0.7)
+  );
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.agenda-card:hover .agenda-card-image-overlay {
+  opacity: 1;
+}
+
+/* Badge date sur l'image */
+.agenda-card-period-chip {
+  position: absolute;
+  left: 1.2rem;
+  bottom: 1.2rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  background: rgba(0, 0, 0, 0.75);
+  color: #f7f5f1;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Corps */
+.agenda-card-body {
+  padding: 1.1rem 1.3rem 1.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.agenda-card-title {
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.agenda-card-location {
+  font-size: 0.9rem;
+  margin: 0;
+  opacity: 0.9;
+}
+
+.agenda-card-description {
+  font-size: 0.9rem;
+  margin: 0.4rem 0 0;
+  opacity: 0.9;
+}
+
+/* Bouton billetterie */
+.agenda-card-button {
+  margin-top: 0.9rem;
+  align-self: flex-start;
+}
+
+/* Petite anim d'apparition (optionnelle mais sympa) */
+@keyframes agendaFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.agenda-card {
+  animation: agendaFadeIn 0.45s ease both;
+}

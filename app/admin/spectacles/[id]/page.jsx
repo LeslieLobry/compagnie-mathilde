@@ -5,11 +5,14 @@ import AdminSpectaclePhotosManager from "../../../../components/AdminSpectaclePh
 import AdminSpectacleDossierForm from "../../../../components/AdminSpectacleDossierForm";
 
 export default async function AdminSpectaclePage({ params }) {
-  const id = Number(params.id);
-  if (Number.isNaN(id)) notFound();
+  // ✅ Next 15 : params est une Promise → on l'await
+  const { id } = await params;
+  const numId = Number(id);
+
+  if (Number.isNaN(numId)) notFound();
 
   const spectacle = await prisma.spectacle.findUnique({
-    where: { id },
+    where: { id: numId },
     include: {
       photos: { orderBy: { order: "asc" } },
     },

@@ -18,39 +18,82 @@ function computeNextOrder(items) {
   return max + 1;
 }
 
+// Construit un texte de période à partir de 2 dates "YYYY-MM-DD"
+function formatPeriodFromDates(start, end) {
+  if (!start) return "";
+
+  const opts = { day: "2-digit", month: "long", year: "numeric" };
+
+  const startDate = new Date(start + "T00:00:00");
+  const startLabel = startDate.toLocaleDateString("fr-FR", opts);
+
+  if (!end) return startLabel;
+
+  const endDate = new Date(end + "T00:00:00");
+  const endLabel = endDate.toLocaleDateString("fr-FR", opts);
+
+  if (start === end) return startLabel;
+
+  return `${startLabel} → ${endLabel}`;
+}
+
 export default function AdminAgendaManager({ initialItems }) {
   const [items, setItems] = useState(
     (initialItems || []).slice().sort(sortByOrder)
   );
   const [editingId, setEditingId] = useState(null);
 
-  const [period, setPeriod] = useState("");
+  // Dates du calendrier
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  const [periodPreview, setPeriodPreview] = useState("");
+
   const [title, setTitle] = useState("");
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
   const [order, setOrder] = useState(computeNextOrder(initialItems || []));
+  const [link, setLink] = useState("");
+
+  // Image : S3
+  const [imageFile, setImageFile] = useState(null);    // fichier sélectionné
+  const [imageUrl, setImageUrl] = useState("");        // URL S3 actuelle (si existante)
+  const [imagePreview, setImagePreview] = useState(""); // aperçu dans le form
 
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
   const resetForm = () => {
     setEditingId(null);
-    setPeriod("");
+    setStartDate("");
+    setEndDate("");
+    setPeriodPreview("");
     setTitle("");
     setLocation("");
     setDescription("");
     setOrder(computeNextOrder(items));
+    setLink("");
+    setImageFile(null);
+    setImageUrl("");
+    setImagePreview("");
     setMessage("");
   };
 
   const handleEdit = (item) => {
     setEditingId(item.id);
-    setPeriod(item.period || "");
+    setStartDate("");
+    setEndDate("");
+    setPeriodPreview(item.period || "");
     setTitle(item.title || "");
     setLocation(item.location || "");
     setDescription(item.description || "");
     setOrder(typeof item.order === "number" ? item.order : 0);
+    setLink(item.link || "");
+    setImageFile(null);
+    setImageUrl(item.imageUrl || "");
+    setImagePreview(item.imageUrl || "");
     setMessage("");
+
     if (typeof window !== "undefined") {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -71,7 +114,6 @@ export default function AdminAgendaManager({ initialItems }) {
       }
 
       setItems((prev) => prev.filter((i) => i.id !== id).sort(sortByOrder));
-      // si on était en train d’éditer celle-là, on nettoie le formulaire
       if (editingId === id) {
         resetForm();
       }
@@ -81,25 +123,91 @@ export default function AdminAgendaManager({ initialItems }) {
     }
   };
 
+  const onChangeStartDate = (value) => {
+    setStartDate(value);
+    setPeriodPreview(formatPeriodFromDates(value, endDate));
+  };
+
+  const onChangeEndDate = (value) => {
+    setEndDate(value);
+    setPeriodPreview(formatPeriodFromDates(startDate, value));
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      setImageFile(null);
+      setImagePreview(imageUrl || "");
+      return;
+    }
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
     setMessage("");
 
-    const payload = {
-      period,
-      title,
-      location,
-      description,
-      order: Number(order) || 0,
-    };
+    if (!startDate) {
+      setMessage("Merci de choisir au moins une date de début.");
+      setSaving(false);
+      return;
+    }
 
-    const url = editingId
-      ? `/api/admin/agenda/${editingId}`
-      : "/api/admin/agenda";
-    const method = editingId ? "PUT" : "POST";
+    const period = formatPeriodFromDates(startDate, endDate);
+    if (!period) {
+      setMessage("La période est invalide.");
+      setSaving(false);
+      return;
+    }
 
     try {
+      // 1️⃣ Upload image si un nouveau fichier a été choisi
+      let finalImageUrl = imageUrl;
+
+      if (imageFile) {
+        const fd = new FormData();
+        fd.append("file", imageFile);
+
+        const uploadRes = await fetch(
+          "/api/admin/agenda/upload-image",
+          {
+            method: "POST",
+            body: fd,
+          }
+        );
+
+        if (!uploadRes.ok) {
+          console.error(
+            "Erreur upload image agenda :",
+            await uploadRes.text()
+          );
+          setMessage("Erreur lors de l'upload de l'image");
+          setSaving(false);
+          return;
+        }
+
+        const data = await uploadRes.json();
+        finalImageUrl = data.url;
+      }
+
+      // 2️⃣ Enregistrement de l'item agenda
+      const payload = {
+        period,
+        title,
+        location,
+        description,
+        order: Number(order) || 0,
+        link: link?.trim() || null,
+        imageUrl: finalImageUrl || null,
+      };
+
+      const url = editingId
+        ? `/api/admin/agenda/${editingId}`
+        : "/api/admin/agenda";
+      const method = editingId ? "PUT" : "POST";
+
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
@@ -109,13 +217,13 @@ export default function AdminAgendaManager({ initialItems }) {
       if (!res.ok) {
         console.error("Erreur save agenda :", await res.text());
         setMessage("Erreur lors de l'enregistrement");
+        setSaving(false);
         return;
       }
 
       const item = await res.json();
 
       if (editingId) {
-        // update
         setItems((prev) =>
           prev
             .map((i) => (i.id === item.id ? item : i))
@@ -123,7 +231,6 @@ export default function AdminAgendaManager({ initialItems }) {
         );
         setMessage("Date mise à jour ✔");
       } else {
-        // create
         setItems((prev) => [...prev, item].sort(sortByOrder));
         setMessage("Date ajoutée ✔");
       }
@@ -144,15 +251,29 @@ export default function AdminAgendaManager({ initialItems }) {
         <h3>{editingId ? "Modifier une date" : "Nouvelle date"}</h3>
 
         <label>
-          Période / Date *
+          Date de début *
           <input
-            type="text"
+            type="date"
             required
-            placeholder="Ex : Mars → Mai 2026"
-            value={period}
-            onChange={(e) => setPeriod(e.target.value)}
+            value={startDate}
+            onChange={(e) => onChangeStartDate(e.target.value)}
           />
         </label>
+
+        <label>
+          Date de fin (facultative)
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => onChangeEndDate(e.target.value)}
+          />
+        </label>
+
+        {periodPreview && (
+          <p className="admin-message admin-hint">
+            Texte affiché : <em>{periodPreview}</em>
+          </p>
+        )}
 
         <label>
           Titre *
@@ -183,6 +304,36 @@ export default function AdminAgendaManager({ initialItems }) {
             onChange={(e) => setDescription(e.target.value)}
           />
         </label>
+
+        <label>
+          Lien billetterie (facultatif)
+          <input
+            type="url"
+            placeholder="https://billetterie.exemple.com"
+            value={link}
+            onChange={(e) => setLink(e.target.value)}
+          />
+        </label>
+
+        <label>
+          Affiche / image (AWS S3)
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+          />
+        </label>
+
+        {imagePreview && (
+          <div className="admin-image-preview">
+            <p>Prévisualisation :</p>
+            <img
+              src={imagePreview}
+              alt="Aperçu"
+              style={{ maxWidth: "200px", borderRadius: "8px" }}
+            />
+          </div>
+        )}
 
         <label>
           Ordre d&apos;affichage
@@ -225,9 +376,11 @@ export default function AdminAgendaManager({ initialItems }) {
             <thead>
               <tr>
                 <th>Ordre</th>
-                <th>Période</th>
+                <th>Date / Période</th>
                 <th>Titre</th>
                 <th>Lieu</th>
+                <th>Billetterie</th>
+                <th>Image</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -238,6 +391,22 @@ export default function AdminAgendaManager({ initialItems }) {
                   <td>{i.period}</td>
                   <td>{i.title}</td>
                   <td>{i.location}</td>
+                  <td>
+                    {i.link ? (
+                      <a
+                        href={i.link}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Billetterie
+                      </a>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
+                  <td>
+                    {i.imageUrl ? "✅" : "—"}
+                  </td>
                   <td className="admin-actions">
                     <button type="button" onClick={() => handleEdit(i)}>
                       Modifier

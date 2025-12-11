@@ -9,12 +9,14 @@ export default function AdminSettingsForm({ settings }) {
     settings?.heroSubtitle || ""
   );
   const [heroText, setHeroText] = useState(settings?.heroText || "");
+
+  // ✅ nouveau champ : texte de présentation
+  const [aboutText, setAboutText] = useState(settings?.aboutText || "");
+
   const [file, setFile] = useState(null);
 
   // URL actuelle de l'image hero (depuis la BDD)
-  const [heroImageUrl, setHeroImageUrl] = useState(
-    settings?.heroImage || ""
-  );
+  const [heroImageUrl, setHeroImageUrl] = useState(settings?.heroImage || "");
 
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -28,13 +30,15 @@ export default function AdminSettingsForm({ settings }) {
     formData.append("heroTitle", heroTitle);
     formData.append("heroSubtitle", heroSubtitle);
     formData.append("heroText", heroText);
+    formData.append("aboutText", aboutText); // ✅ on envoie le texte de présentation
+
     if (file) {
       formData.append("heroImage", file);
     }
 
     try {
       const res = await fetch("/api/admin/settings", {
-        method: "POST", // ou "PUT", les deux marchent avec la route ci-dessus
+        method: "POST", // ou "PUT" selon ta route, ici tu utilisais déjà POST
         body: formData,
       });
 
@@ -62,6 +66,13 @@ export default function AdminSettingsForm({ settings }) {
 
   return (
     <form onSubmit={handleSubmit} className="admin-form">
+      {/* BLOC HERO */}
+      <h4 className="section-title">Bloc hero</h4>
+      <p className="section-lead">
+        Titre, sous-titre et texte qui s&apos;affichent sur la grande image de
+        la page d&apos;accueil.
+      </p>
+
       <label>
         Titre principal
         <textarea
@@ -117,6 +128,26 @@ export default function AdminSettingsForm({ settings }) {
           </div>
         </div>
       )}
+
+      <hr style={{ margin: "2rem 0" }} />
+
+      {/* ✅ NOUVEAU BLOC : Présentation compagnie */}
+      <h4 className="section-title">Présentation de la compagnie</h4>
+      <p className="section-lead">
+        Ce texte apparaît dans le bloc de présentation à gauche sur la page
+        d&apos;accueil. Tu peux utiliser des retours à la ligne pour créer
+        plusieurs paragraphes.
+      </p>
+
+      <label>
+        Texte de présentation
+        <textarea
+          value={aboutText}
+          onChange={(e) => setAboutText(e.target.value)}
+          rows={8}
+          placeholder="Texte de présentation de la Compagnie MATHILDE..."
+        />
+      </label>
 
       <button className="btn primary" type="submit" disabled={saving}>
         {saving ? "Enregistrement..." : "Enregistrer"}

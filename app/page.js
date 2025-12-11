@@ -1,11 +1,24 @@
 // app/page.jsx
+import Image from "next/image";
+import Link from "next/link";
 import prisma from "@/lib/prisma";
 import Galerie from "../components/Galerie/Galerie";
 
 export default async function HomePage() {
   const [settings, spectacles, galleryPhotos, agendaItems] = await Promise.all([
     prisma.siteSettings.findUnique({ where: { id: 1 } }),
-    prisma.spectacle.findMany({ orderBy: { id: "asc" } }),
+    prisma.spectacle.findMany({
+      orderBy: { id: "asc" },
+      include: {
+        photos: {
+          orderBy: [
+            { order: "asc" },
+            { id: "asc" },
+          ],
+          take: 1, // ✅ 1ère photo pour la carte
+        },
+      },
+    }),
     prisma.galleryImage.findMany({
       orderBy: { createdAt: "desc" },
     }),
@@ -15,41 +28,56 @@ export default async function HomePage() {
     }),
   ]);
 
+  const heroImage = settings?.heroImage || "/accueil.jpeg";
+
   return (
     <main className="page">
-      {/* HERO */}
-      <header className="hero">
-        <div className="hero-inner">
-          <div className="hero-text">
-            <div className="kicker">Théâtre & cabaret</div>
-            <h2 className="title">
-              {settings?.heroTitle ||
-                "Des récits qui éclairent l'intime, une scène sobre et graphique."}
-            </h2>
-            {settings?.heroSubtitle && (
-              <p className="lead">{settings.heroSubtitle}</p>
-            )}
-            {settings?.heroText && (
-              <p className="lead small">{settings.heroText}</p>
-            )}
+      {/* HERO FULL-WIDTH */}
+      <header className="hero hero-full">
+        {/* image de fond pleine largeur */}
+        <div className="hero-bg">
+          <Image
+            src={heroImage}
+            alt={
+              settings?.heroAlt || "Photo de spectacle Compagnie MATHILDE"
+            }
+            fill
+            priority
+            sizes="100vw"
+            className="hero-bg-image"
+          />
+        </div>
 
-            <div className="cta">
-              <a className="btn primary" href="/spectacles">
-                Découvrir les spectacles
-              </a>
-              <a className="btn ghost" href="/contact">
-                Nous contacter
-              </a>
-            </div>
-          </div>
+        {/* voile sombre / gradient */}
+        <div className="hero-overlay" />
 
-          <div className="hero-visual">
-            <div className="hero-image-frame">
-              <img
-                className="hero-image"
-                src={settings?.heroImage || "/accueil.jpeg"}
-                alt="Photo de spectacle Compagnie MATHILDE"
-              />
+        {/* contenu par-dessus */}
+        <div className="hero-content">
+          <div className="hero-inner">
+            <div className="hero-text">
+              <div className="kicker">Théâtre &amp; cabaret</div>
+
+              <h2 className="title hero-title">
+                {settings?.heroTitle ||
+                  "Des récits qui éclairent l'intime, une scène sobre et graphique."}
+              </h2>
+
+              {settings?.heroSubtitle && (
+                <p className="lead hero-lead">{settings.heroSubtitle}</p>
+              )}
+
+              {settings?.heroText && (
+                <p className="lead small hero-lead">{settings.heroText}</p>
+              )}
+
+              <div className="cta hero-actions">
+                <a className="btn primary" href="/spectacles">
+                  Découvrir les spectacles
+                </a>
+                <a className="btn ghost" href="/contact">
+                  Nous contacter
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -58,16 +86,23 @@ export default async function HomePage() {
       {/* SECTION COMPAGNIE */}
       <section className="section">
         <div className="container about">
-          <div className="panel">
-            <p>
-              La compagnie MATHILDE est implantée à Saint-Pair-Sur-Mer dans la
-              Manche. Elle défend les textes de Manon Viel qui, mêlant humour et
-              onirisme, interroge nos liens les plus intimes en donnant corps à
-              des fictions sensibles et insolentes pour revisitent nos modèles
-              relationnels et familiaux. Elle porte une parole théâtrale libre,
-              joyeuse et poétique, pour ouvrir de nouveaux imaginaires intimes
-              et politiques.
-            </p>
+          <div className="panel-text">
+            {settings?.aboutText ? (
+              // ✅ On découpe sur les retours à la ligne pour faire plusieurs <p>
+              settings.aboutText.split("\n").map((para, idx) => (
+                <p key={idx}>{para}</p>
+              ))
+            ) : (
+              <p>
+                La compagnie MATHILDE est implantée à Saint-Pair-Sur-Mer dans la
+                Manche. Elle défend les textes de Manon Viel qui, mêlant humour
+                et onirisme, interroge nos liens les plus intimes en donnant
+                corps à des fictions sensibles et insolentes pour revisitent nos
+                modèles relationnels et familiaux. Elle porte une parole
+                théâtrale libre, joyeuse et poétique, pour ouvrir de nouveaux
+                imaginaires intimes et politiques.
+              </p>
+            )}
           </div>
 
           <div className="panel">
@@ -103,43 +138,57 @@ export default async function HomePage() {
           {agendaItems.length === 0 ? (
             <p>Aucune date annoncée pour le moment.</p>
           ) : (
-            <div className="agenda">
+            <div className="home-agenda">
               {agendaItems.map((item) => (
-                <article key={item.id} className="event">
-                  <div className="date">{item.period}</div>
-                  <div>
-                    <h4 style={{ margin: 0, marginBottom: 4 }}>
-                      {item.title}
-                    </h4>
+                <article key={item.id} className="event-card">
+                  <div className="event-card-date">
+                    <span className="event-date-label">{item.period}</span>
+                  </div>
+
+                  <div className="event-card-main">
+                    <h4 className="event-title">{item.title}</h4>
+
                     {item.location && (
-                      <p
-                        style={{
-                          margin: 0,
-                          fontSize: 14,
-                          color: "#a5b1c2",
-                        }}
-                      >
-                        {item.location}
-                      </p>
+                      <p className="event-location">{item.location}</p>
                     )}
+
                     {item.description && (
-                      <p
-                        style={{
-                          marginTop: 6,
-                          fontSize: 14,
-                          color: "#cbd5f5",
-                        }}
-                      >
-                        {item.description}
-                      </p>
+                      <p className="event-description">{item.description}</p>
+                    )}
+
+                    {(item.link || item.imageUrl) && (
+                      <div className="event-meta-row">
+                        {item.link && (
+                          <a
+                            href={item.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn tiny"
+                          >
+                            Billetterie
+                          </a>
+                        )}
+                      </div>
                     )}
                   </div>
+
+                  {item.imageUrl && (
+                    <div className="event-thumb">
+                      <Image
+                        src={item.imageUrl}
+                        alt={item.title}
+                        width={110}
+                        height={72}
+                        className="event-thumb-img"
+                      />
+                    </div>
+                  )}
                 </article>
               ))}
             </div>
           )}
 
-          <div style={{ marginTop: 20 }}>
+          <div className="section-footer">
             <a href="/agenda" className="btn ghost">
               Voir tout l&apos;agenda
             </a>
@@ -155,19 +204,54 @@ export default async function HomePage() {
             Découvrez les créations de la Compagnie MATHILDE.
           </p>
 
-          <div className="grid">
-            {spectacles.map((s) => (
-              <article key={s.id} className="card">
-                <div className="card-top" />
-                <div className="card-bottom">
-                  <h3>{s.title}</h3>
-                  {s.subtitle && <div className="chip">{s.subtitle}</div>}
-                </div>
-              </article>
-            ))}
+          <div className="home-spectacles-grid">
+            {spectacles.map((s) => {
+              const firstPhoto = s.photos?.[0];
+              const posterUrl = firstPhoto?.imagePath || null;
+
+              return (
+                <Link
+                  key={s.id}
+                  href={`/spectacles/${s.id}`}
+                  className="home-spectacle-card"
+                >
+                  <div className="home-spectacle-thumb">
+                    {posterUrl ? (
+                      <Image
+                        src={posterUrl}
+                        alt={firstPhoto?.legend || s.title}
+                        width={400}
+                        height={260}
+                        className="home-spectacle-img"
+                      />
+                    ) : (
+                      <div className="home-spectacle-placeholder">
+                        Visuel à venir
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="home-spectacle-body">
+                    <h4 className="home-spectacle-title">{s.title}</h4>
+                    {s.subtitle && (
+                      <p className="home-spectacle-subtitle">
+                        {s.subtitle}
+                      </p>
+                    )}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+
+          <div className="section-footer">
+            <a href="/spectacles" className="btn ghost">
+              Voir tous les spectacles
+            </a>
           </div>
         </div>
       </section>
+
 
       {/* GALERIE */}
       <Galerie photos={galleryPhotos} />
