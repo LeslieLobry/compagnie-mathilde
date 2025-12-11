@@ -3,15 +3,32 @@
 
 import { useState } from "react";
 
+function sortByOrder(a, b) {
+  const oa = typeof a.order === "number" ? a.order : 0;
+  const ob = typeof b.order === "number" ? b.order : 0;
+  if (oa !== ob) return oa - ob;
+  return a.id - b.id;
+}
+
+function computeNextOrder(items) {
+  if (!items || items.length === 0) return 0;
+  const max = Math.max(
+    ...items.map((i) => (typeof i.order === "number" ? i.order : 0))
+  );
+  return max + 1;
+}
+
 export default function AdminAgendaManager({ initialItems }) {
-  const [items, setItems] = useState(initialItems || []);
+  const [items, setItems] = useState(
+    (initialItems || []).slice().sort(sortByOrder)
+  );
   const [editingId, setEditingId] = useState(null);
 
   const [period, setPeriod] = useState("");
   const [title, setTitle] = useState("");
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
-  const [order, setOrder] = useState(0);
+  const [order, setOrder] = useState(computeNextOrder(initialItems || []));
 
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -22,7 +39,8 @@ export default function AdminAgendaManager({ initialItems }) {
     setTitle("");
     setLocation("");
     setDescription("");
-    setOrder(0);
+    setOrder(computeNextOrder(items));
+    setMessage("");
   };
 
   const handleEdit = (item) => {
@@ -31,23 +49,36 @@ export default function AdminAgendaManager({ initialItems }) {
     setTitle(item.title || "");
     setLocation(item.location || "");
     setDescription(item.description || "");
-    setOrder(item.order ?? 0);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setOrder(typeof item.order === "number" ? item.order : 0);
+    setMessage("");
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm("Supprimer cette date d'agenda ?")) return;
 
-    const res = await fetch(`/api/admin/agenda/${id}`, {
-      method: "DELETE",
-    });
+    try {
+      const res = await fetch(`/api/admin/agenda/${id}`, {
+        method: "DELETE",
+      });
 
-    if (!res.ok) {
-      alert("Erreur lors de la suppression");
-      return;
+      if (!res.ok) {
+        console.error("Erreur DELETE /api/admin/agenda", await res.text());
+        alert("Erreur lors de la suppression");
+        return;
+      }
+
+      setItems((prev) => prev.filter((i) => i.id !== id).sort(sortByOrder));
+      // si on était en train d’éditer celle-là, on nettoie le formulaire
+      if (editingId === id) {
+        resetForm();
+      }
+    } catch (error) {
+      console.error("Erreur réseau DELETE agenda :", error);
+      alert("Erreur réseau lors de la suppression");
     }
-
-    setItems((prev) => prev.filter((i) => i.id !== id));
   };
 
   const handleSubmit = async (e) => {
@@ -68,39 +99,47 @@ export default function AdminAgendaManager({ initialItems }) {
       : "/api/admin/agenda";
     const method = editingId ? "PUT" : "POST";
 
-    const res = await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-    setSaving(false);
+      if (!res.ok) {
+        console.error("Erreur save agenda :", await res.text());
+        setMessage("Erreur lors de l'enregistrement");
+        return;
+      }
 
-    if (!res.ok) {
-      setMessage("Erreur lors de l'enregistrement");
-      return;
+      const item = await res.json();
+
+      if (editingId) {
+        // update
+        setItems((prev) =>
+          prev
+            .map((i) => (i.id === item.id ? item : i))
+            .sort(sortByOrder)
+        );
+        setMessage("Date mise à jour ✔");
+      } else {
+        // create
+        setItems((prev) => [...prev, item].sort(sortByOrder));
+        setMessage("Date ajoutée ✔");
+      }
+
+      resetForm();
+    } catch (error) {
+      console.error("Erreur réseau save agenda :", error);
+      setMessage("Erreur réseau lors de l'enregistrement");
+    } finally {
+      setSaving(false);
     }
-
-    const item = await res.json();
-
-    if (editingId) {
-      // update
-      setItems((prev) =>
-        prev.map((i) => (i.id === item.id ? item : i))
-      );
-      setMessage("Date mise à jour ✔");
-    } else {
-      // create
-      setItems((prev) => [...prev, item].sort((a, b) => a.order - b.order));
-      setMessage("Date ajoutée ✔");
-    }
-
-    resetForm();
   };
 
   return (
     <div className="admin-grid">
-      {/* FORM */}
+      {/* FORMULAIRE */}
       <form onSubmit={handleSubmit} className="admin-form">
         <h3>{editingId ? "Modifier une date" : "Nouvelle date"}</h3>
 
@@ -193,7 +232,7 @@ export default function AdminAgendaManager({ initialItems }) {
               </tr>
             </thead>
             <tbody>
-              {items.map((i) => (
+              {items.sort(sortByOrder).map((i) => (
                 <tr key={i.id}>
                   <td>{i.order}</td>
                   <td>{i.period}</td>

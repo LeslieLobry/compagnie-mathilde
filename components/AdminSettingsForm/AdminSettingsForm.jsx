@@ -10,6 +10,12 @@ export default function AdminSettingsForm({ settings }) {
   );
   const [heroText, setHeroText] = useState(settings?.heroText || "");
   const [file, setFile] = useState(null);
+
+  // URL actuelle de l'image hero (depuis la BDD)
+  const [heroImageUrl, setHeroImageUrl] = useState(
+    settings?.heroImage || ""
+  );
+
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -26,19 +32,32 @@ export default function AdminSettingsForm({ settings }) {
       formData.append("heroImage", file);
     }
 
-    const res = await fetch("/api/admin/settings", {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "POST", // ou "PUT", les deux marchent avec la route ci-dessus
+        body: formData,
+      });
 
-    setSaving(false);
+      if (!res.ok) {
+        console.error("Erreur /api/admin/settings :", await res.text());
+        setMessage("Erreur lors de l'enregistrement");
+        return;
+      }
 
-    if (!res.ok) {
-      setMessage("Erreur lors de l'enregistrement");
-      return;
+      const updated = await res.json();
+      setMessage("Enregistré ✔ (pense à rafraîchir la home)");
+
+      if (updated?.heroImage) {
+        setHeroImageUrl(updated.heroImage);
+      }
+      // optionnel : reset du fichier sélectionné
+      setFile(null);
+    } catch (error) {
+      console.error("Erreur réseau settings :", error);
+      setMessage("Erreur réseau lors de l'enregistrement");
+    } finally {
+      setSaving(false);
     }
-
-    setMessage("Enregistré ✔ (pense à rafraîchir la home)");
   };
 
   return (
@@ -78,6 +97,26 @@ export default function AdminSettingsForm({ settings }) {
           onChange={(e) => setFile(e.target.files?.[0] || null)}
         />
       </label>
+
+      {heroImageUrl && (
+        <div style={{ marginTop: 10 }}>
+          <p style={{ marginBottom: 6 }}>Aperçu de l&apos;image actuelle :</p>
+          <div
+            style={{
+              maxWidth: "400px",
+              borderRadius: "8px",
+              overflow: "hidden",
+              border: "1px solid #ddd",
+            }}
+          >
+            <img
+              src={heroImageUrl}
+              alt="Image de couverture actuelle"
+              style={{ width: "100%", display: "block" }}
+            />
+          </div>
+        </div>
+      )}
 
       <button className="btn primary" type="submit" disabled={saving}>
         {saving ? "Enregistrement..." : "Enregistrer"}

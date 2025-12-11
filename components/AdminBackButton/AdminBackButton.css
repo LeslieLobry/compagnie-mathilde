@@ -1,0 +1,34 @@
+.admin-back {
+  margin-bottom: 1.5rem;
+}
+
+.admin-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid #ddd;
+  background: #f7f7f7;
+  font-size: 0.85rem;
+  text-decoration: none;
+  color: #333;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+}
+
+.admin-back-btn::before {
+  content: "←";
+  font-size: 0.9rem;
+}
+
+.admin-back-btn:hover {
+  background: #ffffff;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+.admin-back-btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}

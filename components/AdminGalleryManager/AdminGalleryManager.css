@@ -1,0 +1,80 @@
+/* -------- Galerie ADMIN -------- */
+
+.admin-gallery {
+  margin-top: 2rem;
+}
+
+.admin-gallery .admin-form {
+  margin-bottom: 2rem;
+}
+
+/* Texte "Aucune photo" */
+.admin-gallery-list > p {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+/* Grille : petites cartes fixes, pas pleine largeur */
+.admin-gallery-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* Chaque vignette : largeur fixe */
+.admin-gallery-item {
+  width: 160px; /* 🔥 taille de la carte */
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  font-size: 0.8rem;
+}
+
+/* Bloc image : hauteur fixe */
+.admin-gallery-thumb {
+  width: 100%;
+  height: 110px; /* 🔥 hauteur de la vignette */
+  overflow: hidden;
+}
+
+.admin-gallery-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* Bloc texte + bouton */
+.admin-gallery-meta {
+  padding: 0.6rem 0.75rem 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.admin-gallery-text strong {
+  font-size: 0.85rem;
+}
+
+.admin-gallery-url {
+  font-size: 0.7rem;
+  opacity: 0.7;
+  word-break: break-all;
+}
+
+/* Petit bouton supprimer */
+.admin-gallery-delete {
+  align-self: flex-start;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  padding: 0.3rem 0.6rem;
+}
+
+/* Sécurité : si jamais un autre style traîne */
+.admin-gallery-item img {
+  max-width: 100%;
+  display: block;
+}

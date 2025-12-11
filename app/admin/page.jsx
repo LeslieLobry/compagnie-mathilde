@@ -35,10 +35,11 @@ export default async function AdminHomePage() {
               <p>Ajouter des photos, légendes, crédits.</p>
             </Link>
 
-            <div className="admin-card admin-card--current">
-              <h3>Settings — Accueil</h3>
-              <p>Modifier le Hero et les textes principaux.</p>
-            </div>
+            {/* 🆕 Carte Galerie */}
+            <Link href="/admin/galerie" className="admin-card">
+              <h3>Galerie</h3>
+              <p>Ajouter / supprimer des photos de la galerie.</p>
+            </Link>
           </div>
 
           {/* FORMULAIRE DES SETTINGS */}

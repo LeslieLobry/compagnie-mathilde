@@ -1,62 +1,79 @@
-// app/api/admin/spectacles/[id]/photos/route.js
+// app/api/admin/spectacles/[spectacleId]/photos/route.js
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { promises as fs } from "fs";
-import path from "path";
+import { uploadToS3 } from "@/lib/s3";
 
 export const runtime = "nodejs";
 
-// POST : ajout photo
+export async function GET(req, { params }) {
+  try {
+    const spectacleId = Number(params.spectacleId);
+    if (!spectacleId) {
+      return NextResponse.json(
+        { error: "ID de spectacle invalide" },
+        { status: 400 }
+      );
+    }
+
+    const photos = await prisma.spectaclePhoto.findMany({
+      where: { spectacleId },
+      orderBy: { order: "asc" },
+    });
+
+    return NextResponse.json(photos, { status: 200 });
+  } catch (error) {
+    console.error("[GET /api/admin/spectacles/[spectacleId]/photos]", error);
+    return NextResponse.json(
+      { error: "Erreur lors du chargement des photos" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(req, { params }) {
-  const spectacleId = Number(params.id);
-  if (!spectacleId) {
+  try {
+    const spectacleId = Number(params.spectacleId);
+    if (!spectacleId) {
+      return NextResponse.json(
+        { error: "ID de spectacle invalide" },
+        { status: 400 }
+      );
+    }
+
+    const formData = await req.formData();
+    const file = formData.get("file");
+    const legend = formData.get("legend") || "";
+    const orderRaw = formData.get("order");
+    const order = orderRaw ? Number(orderRaw) : 0;
+
+    if (!file || typeof file === "string") {
+      return NextResponse.json(
+        { error: "Aucun fichier envoyé" },
+        { status: 400 }
+      );
+    }
+
+    const { key, url } = await uploadToS3({
+      file,
+      folder: `spectacles/${spectacleId}`,
+    });
+
+    const photo = await prisma.spectaclePhoto.create({
+      data: {
+        spectacleId,
+        imagePath: url,
+        storageKey: key,
+        legend: legend || null,
+        order,
+      },
+    });
+
+    return NextResponse.json(photo, { status: 201 });
+  } catch (error) {
+    console.error("[POST /api/admin/spectacles/[spectacleId]/photos]", error);
     return NextResponse.json(
-      { error: "ID spectacle invalide" },
-      { status: 400 }
+      { error: "Erreur lors de l'upload de la photo" },
+      { status: 500 }
     );
   }
-
-  const formData = await req.formData();
-  const legend = formData.get("legend") || "";
-  const orderRaw = formData.get("order");
-  const file = formData.get("image");
-
-  if (!file || typeof file !== "object") {
-    return NextResponse.json(
-      { error: "Image obligatoire" },
-      { status: 400 }
-    );
-  }
-
-  const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
-
-  const uploadDir = path.join(
-    process.cwd(),
-    "public",
-    "uploads",
-    "spectacles",
-    String(spectacleId)
-  );
-  await fs.mkdir(uploadDir, { recursive: true });
-
-  const safeName = (file.name || "photo.jpg").replace(/\s+/g, "-");
-  const fileName = `sp-${spectacleId}-${Date.now()}-${safeName}`;
-  const fullPath = path.join(uploadDir, fileName);
-
-  await fs.writeFile(fullPath, buffer);
-
-  const imagePath = `/uploads/spectacles/${spectacleId}/${fileName}`;
-  const order = Number(orderRaw || 0) || 0;
-
-  const photo = await prisma.spectaclePhoto.create({
-    data: {
-      spectacleId,
-      legend,
-      order,
-      imagePath,
-    },
-  });
-
-  return NextResponse.json(photo, { status: 201 });
 }

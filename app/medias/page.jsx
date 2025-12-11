@@ -1,5 +1,6 @@
 // app/medias/page.jsx
 import prisma from "@/lib/prisma";
+import MediasGallery from "../../components/MediasGallery/MediasGallery";
 
 export default async function MediasPage() {
   const medias = await prisma.mediaItem.findMany({
@@ -22,23 +23,7 @@ export default async function MediasPage() {
           {medias.length === 0 ? (
             <p>Aucune photo pour l&apos;instant.</p>
           ) : (
-            <div className="gallery">
-              {medias.map((m) => (
-                <figure key={m.id}>
-                  <img
-                    src={m.imagePath}
-                    alt={m.legend || m.title || "Photo de spectacle"}
-                  />
-                  {(m.title || m.legend) && (
-                    <figcaption style={{ fontSize: 12, marginTop: 4, color: "#a5b1c2" }}>
-                      {m.title && <strong>{m.title}</strong>}
-                      {m.title && m.legend && " — "}
-                      {m.legend}
-                    </figcaption>
-                  )}
-                </figure>
-              ))}
-            </div>
+            <MediasGallery medias={medias} />
           )}
         </div>
       </section>

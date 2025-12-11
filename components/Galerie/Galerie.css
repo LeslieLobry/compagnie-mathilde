@@ -1,0 +1,350 @@
+/* =======================
+   Section Galerie
+   ======================= */
+
+.section-gallery {
+  padding: 4rem 0;
+  background: #0b0b10; /* fond sombre pour mettre les photos en valeur */
+}
+
+.section-gallery .section-title {
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #f5f5f5;
+}
+
+.section-gallery .section-lead {
+  text-align: center;
+  max-width: 640px;
+  margin: 0 auto 2.5rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: rgba(245, 245, 245, 0.8);
+}
+
+/* adapte si tu as déjà .container global */
+.section-gallery .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* =======================
+   Carousel
+   ======================= */
+
+.gallery-carousel {
+  position: relative;
+}
+
+/* zone visible du slider */
+.gallery-carousel-viewport {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  scrollbar-width: none;        /* Firefox */
+}
+
+.gallery-carousel-viewport::-webkit-scrollbar {
+  display: none;                /* Chrome / Safari */
+}
+
+/* track horizontal */
+.gallery-carousel-track {
+  display: flex;
+}
+
+/* =======================
+   Slide / Image
+   - 1 photo visible à la fois
+   - même hauteur pour tout
+   - photo entière (contain)
+   ======================= */
+
+.gallery-item {
+  position: relative;
+  flex: 0 0 100%;              /* 1 slide = 100% de la largeur */
+  height: 360px;               /* hauteur fixe du cadre */
+  margin: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 14px;
+  background: #000;
+  overflow: hidden;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
+
+  cursor: pointer;
+}
+
+.gallery-item img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;         /* on ne coupe jamais l'image */
+  display: block;
+  transition: transform 0.5s ease, filter 0.5s ease;
+}
+
+/* dégradé pour la légende */
+.gallery-item::before {
+  content: "";
+  position: absolute;
+  inset: 55% 0 0 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.6) 60%,
+    rgba(0, 0, 0, 0.85) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+/* léger effet au survol */
+.gallery-item:hover img {
+  transform: scale(1.02);
+  filter: brightness(0.95);
+}
+
+.gallery-item:hover::before {
+  opacity: 1;
+}
+
+/* =======================
+   Légende (slide)
+   ======================= */
+
+.gallery-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0.75rem;
+  padding: 0.6rem 1rem 0.7rem;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: #f5f5f5;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+}
+
+/* =======================
+   Flèches du carousel
+   ======================= */
+
+.gallery-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: rgba(0, 0, 0, 0.6);
+  color: #f5f5f5;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  line-height: 1;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.gallery-arrow--prev {
+  left: 0.75rem;
+}
+
+.gallery-arrow--next {
+  right: 0.75rem;
+}
+
+.gallery-arrow:hover {
+  background: rgba(0, 0, 0, 0.85);
+  transform: translateY(-50%) scale(1.05);
+}
+
+/* =======================
+   Points (indicateurs)
+   ======================= */
+
+.gallery-dots {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.gallery-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  border: 1px solid #e0c084;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.gallery-dot.is-active {
+  background: #e0c084;
+  transform: scale(1.15);
+}
+
+/* =======================
+   Lightbox plein écran
+   ======================= */
+
+.gallery-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.gallery-lightbox-inner {
+  position: relative;
+  max-width: 1200px;
+  width: 100%;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* bouton fermer (croix) */
+
+.gallery-lightbox-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  border: none;
+  background: rgba(0, 0, 0, 0.75);
+  color: #f5f5f5;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.gallery-lightbox-close:hover {
+  background: rgba(0, 0, 0, 0.95);
+}
+
+/* flèches dans la lightbox */
+
+.gallery-lightbox-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: rgba(0, 0, 0, 0.7);
+  color: #f5f5f5;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  line-height: 1;
+  z-index: 2;
+}
+
+.gallery-lightbox-arrow--prev {
+  left: 0.5rem;
+}
+
+.gallery-lightbox-arrow--next {
+  right: 0.5rem;
+}
+
+.gallery-lightbox-arrow:hover {
+  background: rgba(0, 0, 0, 0.95);
+}
+
+/* image en grand */
+
+.gallery-lightbox-image-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 2.5rem 1.25rem;
+}
+
+.gallery-lightbox-image-wrapper img {
+  max-width: 100%;
+  max-height: calc(100vh - 200px);
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65);
+}
+
+/* Légende lightbox */
+
+.gallery-lightbox-caption {
+  margin-top: 0.25rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #f5f5f5;
+  text-align: center;
+}
+
+/* =======================
+   Responsive
+   ======================= */
+
+@media (max-width: 768px) {
+  .section-gallery {
+    padding: 3rem 0;
+  }
+
+  .gallery-item {
+    height: 260px;
+  }
+
+  .gallery-lightbox-image-wrapper {
+    padding: 2.5rem 1.5rem 1rem;
+  }
+
+  .gallery-lightbox-image-wrapper img {
+    max-height: calc(100vh - 180px);
+  }
+}
+
+@media (max-width: 480px) {
+  .section-gallery .section-title {
+    font-size: 1.6rem;
+  }
+
+  .section-gallery .section-lead {
+    font-size: 0.9rem;
+  }
+
+  .gallery-caption {
+    font-size: 0.8rem;
+    padding-inline: 0.75rem;
+  }
+
+  .gallery-lightbox-caption {
+    font-size: 0.85rem;
+    padding: 0 0.5rem;
+  }
+}

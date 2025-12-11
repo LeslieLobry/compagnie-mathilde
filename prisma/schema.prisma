@@ -12,7 +12,12 @@ model SiteSettings {
   heroTitle    String
   heroSubtitle String
   heroText     String
-  heroImage    String   // chemin vers l'image de couverture (ex: /uploads/hero.jpg)
+
+  // URL complète de l'image hébergée sur S3
+  heroImage    String?
+
+  // Clé S3 pour pouvoir supprimer/remplacer proprement (ex: hero/hero-123.jpg)
+  heroImageKey String?
 }
 
 model Spectacle {
@@ -37,7 +42,12 @@ model SpectaclePhoto {
   spectacle   Spectacle  @relation(fields: [spectacleId], references: [id], onDelete: Cascade)
   spectacleId Int
 
+  // URL S3 complète de la photo
   imagePath   String
+
+  // Clé S3 (ex: spectacles/12/photo-abc.jpg) pour delete
+  storageKey  String?
+
   legend      String?
   order       Int        @default(0)
   createdAt   DateTime   @default(now())
@@ -52,11 +62,32 @@ model AgendaItem {
   order       Int      @default(0) // pour trier l'affichage
   createdAt   DateTime @default(now())
 }
+
 model MediaItem {
   id        Int      @id @default(autoincrement())
   title     String?  // titre optionnel
   legend    String?  // légende / crédit
-  imagePath String   // ex: /uploads/medias/photo-xxx.jpg
+
+  // URL S3 complète (ex: https://.../medias/photo-xxx.jpg)
+  imagePath String
+
+  // Clé S3 interne (ex: medias/photo-xxx.jpg)
+  storageKey String?
+
   order     Int      @default(0)
   createdAt DateTime @default(now())
+}
+
+model GalleryImage {
+  id         Int      @id @default(autoincrement())
+  title      String?
+  alt        String?
+
+  // URL S3
+  imageUrl   String
+
+  // clé S3 pour retrouver/supprimer le fichier sur S3
+  storageKey String?
+
+  createdAt  DateTime @default(now())
 }

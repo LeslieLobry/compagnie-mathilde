@@ -1,7 +1,7 @@
 // app/admin/medias/page.jsx
 import prisma from "@/lib/prisma";
 import AdminMediasManager from "../../../components/AdminMediasManager/AdminMediasManager";
-
+import AdminBackButton from "@/components/AdminBackButton/AdminBackButton";
 export default async function AdminMediasPage() {
   const medias = await prisma.mediaItem.findMany({
     orderBy: { order: "asc" },
@@ -9,6 +9,7 @@ export default async function AdminMediasPage() {
 
   return (
     <main className="page">
+          <AdminBackButton />
       <section className="section">
         <div className="container">
           <h2 className="section-title">Administration — Médias</h2>

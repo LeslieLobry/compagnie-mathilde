@@ -1,6 +1,49 @@
 // app/contact/page.jsx
+"use client";
+
+import { useState } from "react";
 
 export default function ContactPage() {
+  const [form, setForm] = useState({
+    nom: "",
+    email: "",
+    message: "",
+  });
+  const [status, setStatus] = useState("idle"); // idle | loading | success | error
+  const [error, setError] = useState("");
+
+  function handleChange(e) {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setStatus("loading");
+    setError("");
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        throw new Error(data.error || "Erreur lors de l'envoi.");
+      }
+
+      setStatus("success");
+      setForm({ nom: "", email: "", message: "" });
+    } catch (err) {
+      console.error(err);
+      setError(err.message || "Erreur lors de l'envoi.");
+      setStatus("error");
+    }
+  }
+
   return (
     <main className="page">
       <section className="sub-hero">
@@ -14,17 +57,50 @@ export default function ContactPage() {
 
       <section className="section">
         <div className="container cols">
-          <form>
-            <input type="text" name="nom" placeholder="Nom" required />
-            <input type="email" name="email" placeholder="Email" required />
+          {/* Ton formulaire, mais branché sur l'API */}
+          <form className="contact-form" onSubmit={handleSubmit}>
+            <input
+              type="text"
+              name="nom"
+              placeholder="Nom"
+              required
+              value={form.nom}
+              onChange={handleChange}
+            />
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              required
+              value={form.email}
+              onChange={handleChange}
+            />
             <textarea
               name="message"
               placeholder="Votre message"
               rows={4}
+              required
+              value={form.message}
+              onChange={handleChange}
             />
-            <button className="btn primary" type="submit">
-              Envoyer
+            <button
+              className="btn primary"
+              type="submit"
+              disabled={status === "loading"}
+            >
+              {status === "loading" ? "Envoi..." : "Envoyer"}
             </button>
+
+            {status === "success" && (
+              <p className="form-status success">
+                Merci, votre message a bien été envoyé.
+              </p>
+            )}
+            {status === "error" && (
+              <p className="form-status error">
+                {error || "Une erreur est survenue, merci de réessayer."}
+              </p>
+            )}
           </form>
 
           <div className="panel">
@@ -42,8 +118,10 @@ export default function ContactPage() {
               <br />
               Trésorière : Solene Abboud
             </p>
-            <dt>Contact</dt>
-              <dd>compagniemathilde@gmail.com</dd> 
+            <dl>
+              <dt>Contact</dt>
+              <dd>compagniemathilde@gmail.com</dd>
+            </dl>
           </div>
         </div>
       </section>

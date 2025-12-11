@@ -20,7 +20,7 @@ export default function Header() {
           {/* <Link href="/compagnie">Compagnie</Link> */}
           <Link href="/agenda">Agenda</Link>
           <Link href="/medias">Médias</Link>
-          <Link href="/presse">Presse</Link>
+          {/* <Link href="/presse">Presse</Link> */}
           <Link href="/contact">Contact</Link>
         </div>
 
