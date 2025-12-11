@@ -2,9 +2,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 
 export default function MediasGallery({ medias }) {
   const [active, setActive] = useState(null);
+  const [mounted, setMounted] = useState(false);
+
+  // Nécessaire pour utiliser document.body correctement (Next app router)
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Fermer avec Echap
   useEffect(() => {
@@ -21,6 +28,45 @@ export default function MediasGallery({ medias }) {
   if (!medias || medias.length === 0) {
     return <p>Aucune photo pour l&apos;instant.</p>;
   }
+
+  const lightbox =
+    active && mounted
+      ? createPortal(
+          <div
+            className="gallery-lightbox"
+            onClick={() => setActive(null)}
+          >
+            <div
+              className="gallery-lightbox-inner"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                className="gallery-lightbox-close"
+                onClick={() => setActive(null)}
+                aria-label="Fermer"
+              >
+                ×
+              </button>
+
+              <img
+                className="gallery-lightbox-image"
+                src={active.imagePath}
+                alt={active.legend || active.title || "Photo de spectacle"}
+              />
+
+              {(active.title || active.legend) && (
+                <p className="gallery-lightbox-caption">
+                  {active.title && <strong>{active.title}</strong>}
+                  {active.title && active.legend && " — "}
+                  {active.legend}
+                </p>
+              )}
+            </div>
+          </div>,
+          document.body
+        )
+      : null;
 
   return (
     <>
@@ -50,41 +96,7 @@ export default function MediasGallery({ medias }) {
         ))}
       </div>
 
-      {/* LIGHTBOX (AGRANDISSEMENT) */}
-      {active && (
-        <div
-          className="gallery-lightbox"
-          onClick={() => setActive(null)}
-        >
-          <div
-            className="gallery-lightbox-inner"
-            onClick={(e) => e.stopPropagation()} // évite de fermer si on clique sur l'image
-          >
-            <button
-              type="button"
-              className="gallery-lightbox-close"
-              onClick={() => setActive(null)}
-              aria-label="Fermer"
-            >
-              ×
-            </button>
-
-            <img
-              className="gallery-lightbox-image"
-              src={active.imagePath}
-              alt={active.legend || active.title || "Photo de spectacle"}
-            />
-
-            {(active.title || active.legend) && (
-              <p className="gallery-lightbox-caption">
-                {active.title && <strong>{active.title}</strong>}
-                {active.title && active.legend && " — "}
-                {active.legend}
-              </p>
-            )}
-          </div>
-        </div>
-      )}
+      {lightbox}
     </>
   );
 }
