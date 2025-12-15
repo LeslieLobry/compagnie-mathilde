@@ -223,12 +223,12 @@ h4,
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 15% 20%, rgba(241, 39, 75, 0.16), transparent 55%),
+    radial-gradient(circle at 15% 20%, rgba(241, 39, 75, 0.10), transparent 55%),
     linear-gradient(
       to right,
-      rgba(247, 247, 245, 0.96),
-      rgba(247, 247, 245, 0.70),
-      rgba(247, 247, 245, 0.96)
+      rgba(247, 247, 245, 0.55),
+      rgba(247, 247, 245, 0.18),
+      rgba(247, 247, 245, 0.55)
     );
 }
 
