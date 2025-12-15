@@ -1,4 +1,5 @@
-@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Montserrat:wght@600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&display=swap");
+
 
 *,
 *::before,
@@ -11,8 +12,8 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
-  font-family: "Roboto", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
+font-family: "Source Sans 3", "Source Sans Pro", system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
   background: linear-gradient(180deg, #0b1220, #111827);
   color: #e6e8ee;
 }
@@ -32,7 +33,8 @@ a {
 .page {
   min-height: 100vh;
 }
-/* TITRES : Montserrat */
+
+/* TITRES : Fraunces */
 h1,
 h2,
 h3,
@@ -45,9 +47,11 @@ h4,
 .spectacle-title,
 .home-spectacle-title,
 .press-title {
-  font-family: "Montserrat", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+  font-family: "Fraunces", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
+  font-optical-sizing: auto; /* Fraunces est top avec ça */
 }
+
 
 /* NAV */
 
