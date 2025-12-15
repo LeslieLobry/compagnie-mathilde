@@ -24,18 +24,22 @@ export async function GET() {
 async function readPayloadAndMaybeUpload(req) {
   const contentType = req.headers.get("content-type") || "";
 
+  let heroKicker = "";
   let heroTitle = "";
   let heroSubtitle = "";
   let heroText = "";
+  let aboutText = "";
   let newHeroImageUrl = null;
 
   if (contentType.includes("multipart/form-data")) {
     // ✅ cas formulaire avec fichier (FormData)
     const formData = await req.formData();
 
-    heroTitle = formData.get("heroTitle") || "";
-    heroSubtitle = formData.get("heroSubtitle") || "";
-    heroText = formData.get("heroText") || "";
+    heroKicker = (formData.get("heroKicker") || "").toString();
+    heroTitle = (formData.get("heroTitle") || "").toString();
+    heroSubtitle = (formData.get("heroSubtitle") || "").toString();
+    heroText = (formData.get("heroText") || "").toString();
+    aboutText = (formData.get("aboutText") || "").toString();
 
     const file = formData.get("heroImage");
     if (file && typeof file !== "string") {
@@ -48,9 +52,13 @@ async function readPayloadAndMaybeUpload(req) {
   } else if (contentType.includes("application/json")) {
     // ✅ cas JSON classique
     const body = await req.json();
+
+    heroKicker = body.heroKicker ?? "";
     heroTitle = body.heroTitle ?? "";
     heroSubtitle = body.heroSubtitle ?? "";
     heroText = body.heroText ?? "";
+    aboutText = body.aboutText ?? "";
+
     // si tu veux mettre heroImage via JSON un jour:
     if (body.heroImage) {
       newHeroImageUrl = body.heroImage;
@@ -60,19 +68,34 @@ async function readPayloadAndMaybeUpload(req) {
     throw new Error(`Type de contenu non supporté : ${contentType}`);
   }
 
-  return { heroTitle, heroSubtitle, heroText, newHeroImageUrl };
+  return {
+    heroKicker,
+    heroTitle,
+    heroSubtitle,
+    heroText,
+    aboutText,
+    newHeroImageUrl,
+  };
 }
 
 // PUT : mise à jour des textes (+ image si envoyée)
 export async function PUT(req) {
   try {
-    const { heroTitle, heroSubtitle, heroText, newHeroImageUrl } =
-      await readPayloadAndMaybeUpload(req);
-
-    const baseData = {
+    const {
+      heroKicker,
       heroTitle,
       heroSubtitle,
       heroText,
+      aboutText,
+      newHeroImageUrl,
+    } = await readPayloadAndMaybeUpload(req);
+
+    const baseData = {
+      heroKicker: heroKicker.trim() || null, // ✅ nullable
+      heroTitle: heroTitle.toString(),
+      heroSubtitle: heroSubtitle.toString(),
+      heroText: heroText.toString(),
+      aboutText: aboutText.trim() || null, // ✅ nullable
     };
 
     const updateData = newHeroImageUrl
