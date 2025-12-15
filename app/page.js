@@ -55,7 +55,10 @@ export default async function HomePage() {
         <div className="hero-content">
           <div className="hero-inner">
             <div className="hero-text">
-              <div className="kicker">Théâtre &amp; cabaret</div>
+             <div className="kicker">
+  {settings?.heroKicker || "Théâtre & cabaret"}
+</div>
+
 
               <h2 className="title hero-title">
                 {settings?.heroTitle ||

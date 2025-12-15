@@ -12,6 +12,7 @@ model SiteSettings {
   heroTitle    String
   heroSubtitle String
   heroText     String
+  heroKicker   String?   // ✅ nouveau
 
   // URL complète de l'image hébergée sur S3
   heroImage    String?
