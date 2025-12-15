@@ -23,7 +23,7 @@ export default async function HomePage() {
       orderBy: { createdAt: "desc" },
     }),
     prisma.agendaItem.findMany({
-      orderBy: { order: "asc" }, // on respecte l’ordre défini en admin
+      orderBy: { order: "asc" },
       take: 3, // ✅ seulement les 3 premières
     }),
   ]);

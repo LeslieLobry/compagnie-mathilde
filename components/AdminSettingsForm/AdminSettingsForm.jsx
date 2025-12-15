@@ -4,13 +4,14 @@
 import { useState } from "react";
 
 export default function AdminSettingsForm({ settings }) {
+  // ✅ nouveau champ : kicker
+  const [heroKicker, setHeroKicker] = useState(settings?.heroKicker || "");
+
   const [heroTitle, setHeroTitle] = useState(settings?.heroTitle || "");
-  const [heroSubtitle, setHeroSubtitle] = useState(
-    settings?.heroSubtitle || ""
-  );
+  const [heroSubtitle, setHeroSubtitle] = useState(settings?.heroSubtitle || "");
   const [heroText, setHeroText] = useState(settings?.heroText || "");
 
-  // ✅ nouveau champ : texte de présentation
+  // ✅ texte de présentation
   const [aboutText, setAboutText] = useState(settings?.aboutText || "");
 
   const [file, setFile] = useState(null);
@@ -27,10 +28,14 @@ export default function AdminSettingsForm({ settings }) {
     setMessage("");
 
     const formData = new FormData();
+
+    // ✅ kicker envoyé
+    formData.append("heroKicker", heroKicker);
+
     formData.append("heroTitle", heroTitle);
     formData.append("heroSubtitle", heroSubtitle);
     formData.append("heroText", heroText);
-    formData.append("aboutText", aboutText); // ✅ on envoie le texte de présentation
+    formData.append("aboutText", aboutText);
 
     if (file) {
       formData.append("heroImage", file);
@@ -38,7 +43,7 @@ export default function AdminSettingsForm({ settings }) {
 
     try {
       const res = await fetch("/api/admin/settings", {
-        method: "POST", // ou "PUT" selon ta route, ici tu utilisais déjà POST
+        method: "POST", // ou "PUT" selon ta route
         body: formData,
       });
 
@@ -54,7 +59,7 @@ export default function AdminSettingsForm({ settings }) {
       if (updated?.heroImage) {
         setHeroImageUrl(updated.heroImage);
       }
-      // optionnel : reset du fichier sélectionné
+
       setFile(null);
     } catch (error) {
       console.error("Erreur réseau settings :", error);
@@ -69,9 +74,20 @@ export default function AdminSettingsForm({ settings }) {
       {/* BLOC HERO */}
       <h4 className="section-title">Bloc hero</h4>
       <p className="section-lead">
-        Titre, sous-titre et texte qui s&apos;affichent sur la grande image de
-        la page d&apos;accueil.
+        Kicker, titre, sous-titre et texte qui s&apos;affichent sur la grande
+        image de la page d&apos;accueil.
       </p>
+
+      {/* ✅ KICKER */}
+      <label>
+        Kicker (petit texte au-dessus du titre)
+        <input
+          type="text"
+          value={heroKicker}
+          onChange={(e) => setHeroKicker(e.target.value)}
+          placeholder='Ex : "Théâtre & cabaret"'
+        />
+      </label>
 
       <label>
         Titre principal
@@ -131,7 +147,7 @@ export default function AdminSettingsForm({ settings }) {
 
       <hr style={{ margin: "2rem 0" }} />
 
-      {/* ✅ NOUVEAU BLOC : Présentation compagnie */}
+      {/* Présentation compagnie */}
       <h4 className="section-title">Présentation de la compagnie</h4>
       <p className="section-lead">
         Ce texte apparaît dans le bloc de présentation à gauche sur la page

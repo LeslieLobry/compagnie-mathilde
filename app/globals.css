@@ -2,6 +2,9 @@
 
 /* ✅ Corps : Montserrat (Google Fonts) */
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap");
+/* app/globals.css — TOUT EN HAUT DU FICHIER */
+@import url("https://fonts.googleapis.com/css2?family=Allura&family=Sansation:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap");
+
 
 /* ✅ Titres : Sensation (à héberger en local dans /public/fonts/)
    Place ces fichiers :
@@ -83,8 +86,7 @@ h4,
 .spectacle-title,
 .home-spectacle-title,
 .press-title {
-  font-family: "Sensation", "Montserrat", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
+  font-family: "Sansation", system-ui, -apple-system, "Segoe UI", sans-serif;
   color: var(--title);
 }
 
