@@ -2,28 +2,14 @@
 
 /* ✅ Corps : Montserrat (Google Fonts) */
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap");
-/* app/globals.css — TOUT EN HAUT DU FICHIER */
-@import url("https://fonts.googleapis.com/css2?family=Allura&family=Sansation:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap");
 
-
-/* ✅ Titres : Sensation (à héberger en local dans /public/fonts/)
-   Place ces fichiers :
-   /public/fonts/Sensation.woff2
-   /public/fonts/Sensation.woff
-*/
-@font-face {
-  font-family: "Sensation";
-  src: url("/fonts/Sensation.woff2") format("woff2"),
-       url("/fonts/Sensation.woff") format("woff");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
+/* ✅ Titres : Sansation (Google Fonts) */
+@import url("https://fonts.googleapis.com/css2?family=Sansation:wght@300;400;700&display=swap");
 
 :root {
   --bg: #f7f7f5;
   --text: #545454;
-  --title: #f1274b;
+  --title: #CE0A0A;
   --muted: rgba(84, 84, 84, 0.75);
 
   --surface: rgba(255, 255, 255, 0.72);
@@ -73,7 +59,7 @@ a {
   min-height: 100vh;
 }
 
-/* ✅ TITRES : Sensation + couleur accent */
+/* ✅ TITRES : Sansation + couleur accent */
 h1,
 h2,
 h3,
@@ -252,7 +238,7 @@ h4,
 }
 
 .kicker {
-  color: rgba(241, 39, 75, 0.85);
+  color: white;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -267,7 +253,7 @@ h4,
 }
 
 .lead {
-  color: var(--muted);
+  color: white;
   font-size: clamp(15px, 1.7vw, 17px);
   max-width: 60ch;
   margin: 0 0 0.25em;
@@ -692,7 +678,7 @@ textarea {
 .admin-form h3 {
   margin: 0 0 10px;
   color: var(--title);
-  font-family: "Sensation", "Montserrat", sans-serif;
+  font-family: "Sansation", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 .admin-form label {
