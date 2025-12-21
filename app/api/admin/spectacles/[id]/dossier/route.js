@@ -1,7 +1,7 @@
 // app/api/admin/spectacles/[id]/dossier/route.js
 import { NextResponse } from "next/server";
-import prisma from "../../../../../../lib/prisma";
-import { s3 } from "../../../../../../lib/s3";
+import prisma from "@/lib/prisma";
+import { s3 } from "@/lib/s3";
 import { PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import path from "path";
 
