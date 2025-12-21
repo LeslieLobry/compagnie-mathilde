@@ -1,11 +1,15 @@
 // app/api/admin/spectacles/[id]/dossier/route.js
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { promises as fs } from "fs";
+import { s3 } from "@/lib/s3";
+import { PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import path from "path";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+const BUCKET = process.env.AWS_S3_BUCKET;
+const REGION = process.env.AWS_REGION;
 
 function sanitizeFilename(name = "") {
   const base = path.basename(name); // bloque ../
@@ -17,6 +21,13 @@ function sanitizeFilename(name = "") {
 
 export async function POST(req, ctx) {
   try {
+    if (!BUCKET || !REGION) {
+      return NextResponse.json(
+        { error: "AWS_S3_BUCKET ou AWS_REGION manquant (Vercel env vars)" },
+        { status: 500 }
+      );
+    }
+
     // ✅ Next 15: params peut être une Promise
     const p =
       ctx?.params && typeof ctx.params?.then === "function"
@@ -44,8 +55,6 @@ export async function POST(req, ctx) {
     }
 
     const formData = await req.formData();
-
-    // ✅ accepte plusieurs noms de champ (au cas où)
     const file = formData.get("dossier") || formData.get("file");
 
     if (!file || typeof file === "string" || !file.name) {
@@ -73,24 +82,58 @@ export async function POST(req, ctx) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    const uploadDir = path.join(process.cwd(), "public", "uploads", "dossiers");
-    await fs.mkdir(uploadDir, { recursive: true });
+    // ✅ limite taille (option) — ajuste
+    const max = 15 * 1024 * 1024; // 15MB
+    if (buffer.length > max) {
+      return NextResponse.json(
+        { error: "PDF trop lourd (max 15MB)." },
+        { status: 400 }
+      );
+    }
 
-    const finalName = `spectacle-${spectacleId}-${Date.now()}-${filename}`;
-    const fullPath = path.join(uploadDir, finalName);
+    // Récupère l’ancienne clé pour pouvoir supprimer après remplacement
+    const existing = await prisma.spectacle.findUnique({
+      where: { id: spectacleId },
+      select: { dossierKey: true },
+    });
 
-    await fs.writeFile(fullPath, buffer);
+    // ✅ upload S3
+    const key = `spectacles/${spectacleId}/dossier/${Date.now()}-${crypto.randomUUID()}-${filename}`;
 
-    const dossierPath = `/uploads/dossiers/${finalName}`;
+    await s3.send(
+      new PutObjectCommand({
+        Bucket: BUCKET,
+        Key: key,
+        Body: buffer,
+        ContentType: "application/pdf",
+      })
+    );
+
+    // ✅ lien stable côté site (recommandé si bucket privé)
+    const dossierPath = `/api/spectacles/${spectacleId}/dossier`;
 
     const spectacle = await prisma.spectacle.update({
       where: { id: spectacleId },
-      data: { dossierPath },
+      data: { dossierKey: key, dossierPath },
     });
+
+    // ✅ supprime l'ancien PDF si remplacement
+    if (existing?.dossierKey && existing.dossierKey !== key) {
+      try {
+        await s3.send(
+          new DeleteObjectCommand({
+            Bucket: BUCKET,
+            Key: existing.dossierKey,
+          })
+        );
+      } catch (e) {
+        console.warn("Suppression ancien dossier S3 impossible:", e);
+      }
+    }
 
     return NextResponse.json({ ok: true, spectacle });
   } catch (err) {
-    console.error("Erreur upload dossier spectacle:", err);
+    console.error("Erreur upload dossier spectacle (S3):", err);
     return NextResponse.json(
       { error: "Erreur serveur", details: String(err) },
       { status: 500 }

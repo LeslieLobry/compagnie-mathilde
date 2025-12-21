@@ -1,62 +1,98 @@
 // app/api/admin/spectacles/[id]/photos/route.js
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import fs from "fs/promises";
+import { s3 } from "@/lib/s3";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
 import path from "path";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export async function POST(req, { params }) {
-  try {
-    // ✅ Next 15 : params est une Promise
-    const { id } = await params;
-    const spectacleId = Number(id);
+const BUCKET = process.env.AWS_S3_BUCKET;
+const REGION = process.env.AWS_REGION;
 
-    if (Number.isNaN(spectacleId)) {
+function sanitizeFilename(name = "") {
+  const base = path.basename(name); // empêche ../
+  return base
+    .replace(/[^\w.\-()]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+export async function POST(req, ctx) {
+  try {
+    if (!BUCKET || !REGION) {
+      return NextResponse.json(
+        { error: "AWS_S3_BUCKET ou AWS_REGION manquant (Vercel env vars)" },
+        { status: 500 }
+      );
+    }
+
+    // ✅ Next 15 : params peut être une Promise
+    const p =
+      ctx?.params && typeof ctx.params?.then === "function"
+        ? await ctx.params
+        : ctx?.params;
+
+    const spectacleId = Number(p?.id);
+    if (!spectacleId || Number.isNaN(spectacleId)) {
       return NextResponse.json(
         { error: "ID de spectacle invalide" },
         { status: 400 }
       );
     }
 
+    const contentType = req.headers.get("content-type") || "";
+    if (!contentType.includes("multipart/form-data")) {
+      return NextResponse.json(
+        {
+          error: "Cette route attend un FormData (multipart/form-data).",
+          receivedContentType: contentType,
+        },
+        { status: 400 }
+      );
+    }
+
     const formData = await req.formData();
-    const image = formData.get("image"); // ⬅️ on aligne avec le front
-    const legend = formData.get("legend") || "";
+
+    // ⬅️ aligné avec ton front
+    const image = formData.get("image");
+    const legend = (formData.get("legend") || "").toString();
+
     const orderRaw = formData.get("order");
     const order =
       orderRaw !== null && orderRaw !== undefined && orderRaw !== ""
         ? Number(orderRaw)
         : null;
 
-    if (!image || typeof image === "string") {
+    if (!image || typeof image === "string" || !image.name) {
       return NextResponse.json(
-        { error: "Fichier image manquant" },
+        { error: "Fichier image manquant (champ 'image')." },
         { status: 400 }
       );
     }
 
-    // -------- Sauvegarde locale dans /public/uploads/spectacles/<id>/ --------
-    const buffer = Buffer.from(await image.arrayBuffer());
+    // ✅ Vérif mime (simple)
+    const mime = image.type || "";
+    if (!mime.startsWith("image/")) {
+      return NextResponse.json(
+        { error: "Le fichier doit être une image.", receivedType: mime },
+        { status: 400 }
+      );
+    }
 
-    const uploadDir = path.join(
-      process.cwd(),
-      "public",
-      "uploads",
-      "spectacles",
-      String(spectacleId)
-    );
-    await fs.mkdir(uploadDir, { recursive: true });
+    // ✅ Taille max (évite crash serverless) — ajuste si besoin
+    const bytes = await image.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+    const max = 8 * 1024 * 1024; // 8 MB
+    if (buffer.length > max) {
+      return NextResponse.json(
+        { error: "Image trop lourde (max 8MB)." },
+        { status: 400 }
+      );
+    }
 
-    const safeName = image.name.replace(/\s+/g, "-");
-    const filename = `${Date.now()}-${safeName}`;
-    const fullPath = path.join(uploadDir, filename);
-
-    await fs.writeFile(fullPath, buffer);
-
-    const publicPath = `/uploads/spectacles/${spectacleId}/${filename}`;
-
-    // -------- Calcul de l'ordre --------
+    // ✅ Calcul de l'ordre (comme ta version)
     let finalOrder = 0;
     if (order !== null && !Number.isNaN(order)) {
       finalOrder = order;
@@ -68,13 +104,29 @@ export async function POST(req, { params }) {
       finalOrder = (maxOrder._max.order || 0) + 1;
     }
 
+    // ✅ Upload S3
+    const safeName = sanitizeFilename(image.name);
+    const key = `spectacles/${spectacleId}/photos/${Date.now()}-${crypto.randomUUID()}-${safeName}`;
+
+    await s3.send(
+      new PutObjectCommand({
+        Bucket: BUCKET,
+        Key: key,
+        Body: buffer,
+        ContentType: mime,
+      })
+    );
+
+    // ✅ URL publique S3 (si ton bucket/prefix est lisible en public)
+    const imagePath = `https://${BUCKET}.s3.${REGION}.amazonaws.com/${key}`;
+
     const photo = await prisma.spectaclePhoto.create({
       data: {
         spectacleId,
-        imagePath: publicPath,
+        imagePath,
         legend,
         order: finalOrder,
-        storageKey: null, // si tu passes à S3 plus tard
+        storageKey: key, // ✅ important pour delete plus tard
       },
     });
 
@@ -82,7 +134,7 @@ export async function POST(req, { params }) {
   } catch (error) {
     console.error("[POST /api/admin/spectacles/[id]/photos]", error);
     return NextResponse.json(
-      { error: "Erreur interne lors de l'upload" },
+      { error: "Erreur interne lors de l'upload", details: String(error) },
       { status: 500 }
     );
   }
