@@ -35,12 +35,15 @@ model Spectacle {
   distribution String?
   autresInfos  String?
 
-  dossierPath  String?          // URL du PDF (dossier presse / artistique)
+  dossierPath  String?          // URL côté site (ex: /api/spectacles/{id}/dossier)
+  dossierKey   String?          // ✅ clé S3 pour delete/replace (ex: spectacles/12/dossier/xxx.pdf)
+
   photos       SpectaclePhoto[]
 
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
 }
+
 
 model SpectaclePhoto {
   id          Int        @id @default(autoincrement())

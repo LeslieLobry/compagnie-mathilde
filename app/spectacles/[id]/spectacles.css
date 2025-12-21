@@ -3,8 +3,9 @@
    =========================== */
 
 .spectacle-page {
-  background: radial-gradient(circle at top, #111827 0, #050816 55%, #000 100%);
-  color: #f9fafb;
+  /* ✅ fini le fond bleu/noir */
+  background: var(--bg, #f7f7f5);
+  color: var(--text, #545454);
 }
 
 /* HERO
@@ -12,8 +13,11 @@
 
 .spectacle-hero {
   position: relative;
-  padding: 5rem 0 3.5rem;
-  background: linear-gradient(135deg, #111827, #020617);
+  padding: 4.2rem 0 2.8rem;
+
+  /* ✅ plus de dégradé sombre */
+  background: transparent;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
 }
 
 /* inner en 2 colonnes : texte + image */
@@ -24,13 +28,13 @@
 
   display: grid;
   grid-template-columns: minmax(0, 3fr) minmax(0, 2.4fr);
-  gap: 2.5rem;
+  gap: 2.2rem;
   align-items: center;
 }
 
 /* bloc texte à gauche */
 .spectacle-hero-text {
-  max-width: 580px;
+  max-width: 620px;
 }
 
 /* bloc image à droite */
@@ -39,15 +43,18 @@
   margin-left: auto;
   border-radius: 1.25rem;
   overflow: hidden;
-  background: radial-gradient(circle at top, #1f2937, #020617);
-  box-shadow: 0 22px 55px rgba(0, 0, 0, 0.7);
+
+  /* ✅ clair + bord léger */
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.10);
 }
 
 .spectacle-hero-image img {
   width: 100%;
   height: auto;
-  max-height: 360px;      /* limite la hauteur totale */
-  object-fit: contain;    /* on ne coupe pas l’image */
+  max-height: 360px; /* limite la hauteur totale */
+  object-fit: contain; /* on ne coupe pas l’image */
   display: block;
 }
 
@@ -55,30 +62,36 @@
 
 .spectacle-kicker {
   display: inline-flex;
-  padding: 0.15rem 0.7rem;
+  padding: 0.18rem 0.75rem;
   border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.5);
+  border: 1px solid rgba(15, 23, 42, 0.14);
+
   font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #e5e7eb;
+
+  color: rgba(84, 84, 84, 0.9);
   margin-bottom: 0.75rem;
+
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(10px);
-  background: rgba(15, 23, 42, 0.55);
 }
 
 .spectacle-title {
   font-size: clamp(2.1rem, 3vw, 2.8rem);
   line-height: 1.1;
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.55rem;
   letter-spacing: 0.02em;
+
+  /* ✅ cohérent avec ton accent */
+  color: var(--title, #f1274b);
 }
 
 .spectacle-subtitle {
   font-size: 1.05rem;
   max-width: 40rem;
-  margin: 0 0 1.5rem;
-  color: #e5e7eb;
+  margin: 0 0 1.4rem;
+  color: rgba(84, 84, 84, 0.82);
 }
 
 .spectacle-hero-meta {
@@ -88,31 +101,51 @@
 }
 
 .spectacle-pill {
-  font-size: 0.85rem;
-  padding: 0.4rem 0.7rem;
+  font-size: 0.86rem;
+  padding: 0.42rem 0.78rem;
   border-radius: 999px;
-  background: rgba(15, 23, 42, 0.8);
-  border: 1px solid rgba(148, 163, 184, 0.5);
-  color: #e5e7eb;
+
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  color: rgba(84, 84, 84, 0.92);
+
+  box-shadow: 0 10px 18px rgba(15, 23, 42, 0.06);
 }
 
 .spectacle-pill strong {
-  font-weight: 600;
+  font-weight: 700;
+  color: rgba(40, 40, 40, 0.92);
 }
 
 /* CONTENU
    --------------------------- */
 
 .spectacle-content {
-  padding-top: 3.5rem;
-  padding-bottom: 3.5rem;
+  padding-top: 2.6rem;
+  padding-bottom: 3.2rem;
 }
 
 .spectacle-layout {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(0, 1.3fr);
-  gap: 2.5rem;
+  gap: 2.2rem;
   align-items: flex-start;
+}
+
+/* ✅ Panels (cadres) : clair + clean */
+.spectacle-page .panel {
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 1.25rem;
+  padding: 1.35rem 1.35rem;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.10);
+}
+
+.spectacle-page .panel-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.25rem;
+  letter-spacing: 0.01em;
+  color: var(--title, #f1274b);
 }
 
 .spectacle-story .panel-title,
@@ -123,20 +156,31 @@
 .spectacle-text {
   margin: 0;
   line-height: 1.7;
-  color: #e5e7eb;
+  color: var(--text, #545454);
+
+  /* ✅ si tu as des retours ligne en BDD */
+  white-space: pre-line;
 }
 
+/* CREDITS — FIX (labels qui ne se cassent plus en vertical) */
+
 .credits-list {
-  margin: 0 0 1.5rem;
+  margin: 0 0 1.2rem;
   padding: 0;
+  width: 100%;
+  grid : none
 }
 
 .credits-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-  gap: 0.4rem 1.5rem;
-  padding: 0.4rem 0;
-  border-bottom: 1px dashed rgba(148, 163, 184, 0.3);
+
+  /* ✅ colonne label jamais trop petite */
+  grid-template-columns: clamp(140px, 34%, 190px) minmax(0, 1fr);
+
+  gap: 0.45rem 1.1rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px dashed rgba(15, 23, 42, 0.16);
+  align-items: start;
 }
 
 .credits-row:last-child {
@@ -144,26 +188,52 @@
 }
 
 .credits-row dt {
-  font-size: 0.85rem;
+  margin: 0;
+
+  font-size: 0.82rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #9ca3af;
+  color: rgba(84, 84, 84, 0.65);
+
+  /* ✅ évite le “wrap par lettre” */
+  min-width: 0;
+  word-break: normal;
+  overflow-wrap: normal;
+  white-space: normal;
 }
 
 .credits-row dd {
   margin: 0;
   font-size: 0.95rem;
-  color: #e5e7eb;
+  color: rgba(40, 40, 40, 0.9);
+
+  /* ✅ les valeurs peuvent retourner à la ligne proprement */
+  min-width: 0;
+  white-space: pre-line;
+  overflow-wrap: anywhere; /* protège si tu as un mot/URL très long */
 }
 
+/* ✅ Sur mobile : on empile label + valeur (plus de squeeze) */
+@media (max-width: 520px) {
+  .credits-row {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+
+  .credits-row dt {
+    font-size: 0.78rem;
+  }
+}
+
+
 .spectacle-dossier {
-  margin-top: 1.2rem;
+  margin-top: 1.1rem;
 }
 
 .spectacle-contact {
-  margin-top: 1rem;
-  font-size: 0.85rem;
-  color: #9ca3af;
+  margin-top: 0.9rem;
+  font-size: 0.88rem;
+  color: rgba(84, 84, 84, 0.7);
 }
 
 .spectacle-contact-link {
@@ -196,8 +266,12 @@
   position: relative;
   border-radius: 0.9rem;
   overflow: hidden;
-  background: radial-gradient(circle at top, #1f2937, #020617);
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.65);
+
+  /* ✅ clair */
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.10);
+
   transform: translateY(0);
   transition:
     transform 0.22s ease-out,
@@ -208,20 +282,21 @@
 .spectacle-gallery-image-wrapper img {
   width: 100%;
   height: auto;
-  max-height: 260px;        /* limite douce sans crop */
-  object-fit: contain;      /* pas de coupe */
+  max-height: 260px; /* limite douce sans crop */
+  object-fit: contain; /* pas de coupe */
   display: block;
   transform: none;
   transition: transform 0.2s ease-out;
 }
 
+/* ✅ survol discret, pas d’overlay sombre */
 .spectacle-gallery-image-wrapper::after {
   content: "";
   position: absolute;
   inset: 0;
   background: linear-gradient(
     to top,
-    rgba(15, 23, 42, 0.7),
+    rgba(15, 23, 42, 0.06),
     transparent 55%
   );
   opacity: 0;
@@ -230,11 +305,11 @@
 
 .spectacle-gallery-item:hover .spectacle-gallery-image-wrapper {
   transform: translateY(-4px);
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.9);
+  box-shadow: 0 22px 55px rgba(15, 23, 42, 0.16);
 }
 
 .spectacle-gallery-item:hover .spectacle-gallery-image-wrapper img {
-  transform: scale(1.06);
+  transform: scale(1.04);
 }
 
 .spectacle-gallery-item:hover .spectacle-gallery-image-wrapper::after {
@@ -243,8 +318,8 @@
 
 .spectacle-caption {
   margin-top: 0.45rem;
-  font-size: 0.8rem;
-  color: #9ca3af;
+  font-size: 0.82rem;
+  color: rgba(84, 84, 84, 0.7);
 }
 
 /* RESPONSIVE
@@ -252,13 +327,13 @@
 
 @media (max-width: 900px) {
   .spectacle-hero {
-    padding: 3.8rem 0 2.2rem;
+    padding: 3.2rem 0 2rem;
   }
 
   .spectacle-hero-inner {
     padding: 0 1.1rem;
     grid-template-columns: 1fr; /* texte puis image */
-    gap: 1.8rem;
+    gap: 1.5rem;
   }
 
   .spectacle-hero-image {
@@ -268,6 +343,10 @@
 
   .spectacle-layout {
     grid-template-columns: 1fr;
+  }
+
+  .spectacle-page .panel {
+    padding: 1.15rem 1.15rem;
   }
 
   .spectacle-gallery-grid {
