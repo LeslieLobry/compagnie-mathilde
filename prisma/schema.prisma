@@ -105,12 +105,13 @@ model GalleryImage {
 }
 model PressItem {
   id        Int      @id @default(autoincrement())
-  title     String           // Titre de l’article
-  mediaName String           // Nom du média (Libération, France 3…)
-  url       String?          // Lien vers l’article en ligne
-  quote     String?          // Petite citation / phrase mise en avant
-  imageUrl  String?          // URL de la photo/scan de l’article
-  date      DateTime?        // Date de parution
-  order     Int      @default(0) // Pour trier si besoin
+  title     String
+  mediaName String
+  url       String?
+  quote     String?
+  imageUrl  String?
+  imageKey  String?   // ✅ clé S3 pour delete/replace
+  date      DateTime?
+  order     Int      @default(0)
   createdAt DateTime @default(now())
 }
